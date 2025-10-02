@@ -46,13 +46,18 @@ async function sendData(type, formData, month) {
     try {
         const res = await fetch(API_URL, {
             method: "POST",
-            body: JSON.stringify(payload),
-            headers: { "Content-Type": "application/json" }
+            mode: "no-cors",   // 👈 disables CORS enforcement
+            headers: { "Content-Type": "text/plain" }, // 👈 avoid preflight
+            body: JSON.stringify(payload)
         });
-        const result = await res.json();
-        return result.status === "success";
+
+        // ⚠️ With no-cors, response is opaque, so we can't read it.
+        // Just assume success if no error thrown.
+        return true;
+
     } catch (err) {
-        console.error(err);
+        console.error("Fetch failed:", err);
         return false;
     }
 }
+
