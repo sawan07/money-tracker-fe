@@ -169,3 +169,28 @@ button:hover {
 #remainingBalance.red {
     color: red;
 }
+
+/* lock overlay */
+#lockOverlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+}
+
+#lockBox {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    max-width: 320px;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+#lockBox button {
+    margin: 8px 6px;
+    padding: 10px 14px;
+}
