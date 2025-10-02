@@ -74,6 +74,29 @@ textarea {
     resize: vertical;
 }
 
+/* Normalize date inputs on iOS */
+input[type="date"] {
+    -webkit-appearance: none;
+    /* Remove iOS default styles */
+    -moz-appearance: none;
+    appearance: none;
+
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: #fff;
+    box-sizing: border-box;
+}
+
+input[type="date"]:focus {
+    border-color: #4caf50;
+    box-shadow: 0 0 4px rgba(76, 175, 80, 0.3);
+    outline: none;
+}
+
+
 /* Buttons */
 button {
     margin-top: 5px;
@@ -130,4 +153,19 @@ button:hover {
         font-size: 1rem;
         padding: 16px;
     }
+}
+
+#balanceContainer {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+#remainingBalance.green {
+    color: green;
+}
+
+#remainingBalance.red {
+    color: red;
 }

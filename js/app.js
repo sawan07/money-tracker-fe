@@ -77,4 +77,35 @@ function finishProgress() {
     }, 400);
 }
 
+function updateBalanceDisplay(balance) {
+    const balanceEl = document.getElementById("remainingBalance");
+
+    // Ensure balance is a number
+    let numericBalance = parseFloat(balance.toString().replace(/[^\d.-]/g, "")) || 0;
+
+    balanceEl.textContent = `£${numericBalance.toFixed(2)}`;
+
+    if (numericBalance < 100) {
+        balanceEl.classList.remove("green");
+        balanceEl.classList.add("red");
+    } else {
+        balanceEl.classList.remove("red");
+        balanceEl.classList.add("green");
+    }
+}
+
+async function fetchBalance(month) {
+    try {
+        const res = await fetch(`${API_URL}?month=${encodeURIComponent(month)}`);
+        const data = await res.json();
+        if (data.status === "ok") {
+            updateBalanceDisplay(data.remaining);
+        } else {
+            console.error("Balance error:", data.message);
+        }
+    } catch (err) {
+        console.error("Fetch balance failed:", err);
+    }
+}
+
 
