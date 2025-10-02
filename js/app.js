@@ -61,3 +61,20 @@ async function sendData(type, formData, month) {
     }
 }
 
+function startProgress() {
+    const bar = document.getElementById("progressBar");
+    bar.style.width = "0";
+    setTimeout(() => {
+        bar.style.width = "80%"; // grow to 80% while waiting
+    }, 50);
+}
+
+function finishProgress() {
+    const bar = document.getElementById("progressBar");
+    bar.style.width = "100%"; // complete bar
+    setTimeout(() => {
+        bar.style.width = "0"; // reset after short delay
+    }, 400);
+}
+
+

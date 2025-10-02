@@ -46,3 +46,15 @@ button {
 .error {
     color: red;
 }
+
+#progressBar {
+    height: 4px;
+    width: 0;
+    background: #4caf50;
+    /* green bar */
+    position: fixed;
+    top: 0;
+    left: 0;
+    transition: width 0.3s ease;
+    z-index: 1000;
+}
