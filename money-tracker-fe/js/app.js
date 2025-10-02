@@ -1,4 +1,4 @@
-const API_URL = "YOUR_WEB_APP_URL"; // <-- Replace with Apps Script Web App URL
+const API_URL = "https://script.google.com/macros/s/AKfycbwsf5BrcTbwjMZcwNd4CdwLN2l76nHcRye3n2v9EnzaFvk2SWBZGbeptONSxtcVvmiThg/exec";
 
 // Month generation
 const monthSelect = document.getElementById("monthSelect");
