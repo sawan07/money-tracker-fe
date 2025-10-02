@@ -3,40 +3,61 @@ body {
     max-width: 600px;
     margin: auto;
     padding: 20px;
+    background: #fafafa;
 }
 
+h1,
 h2 {
-    margin-top: 40px;
+    text-align: center;
 }
 
 form {
     border: 1px solid #ccc;
-    padding: 20px;
+    padding: 15px;
     border-radius: 8px;
     margin-bottom: 20px;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 label {
     display: block;
-    margin-top: 10px;
+    margin-top: 12px;
+    font-size: 0.95rem;
 }
 
 input,
 select,
 textarea {
     width: 100%;
-    padding: 8px;
-    margin-top: 5px;
+    padding: 10px;
+    margin-top: 6px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
 }
 
 button {
     margin-top: 15px;
-    padding: 10px 15px;
+    padding: 12px;
+    width: 100%;
+    border: none;
+    border-radius: 6px;
+    background: #4caf50;
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #43a047;
 }
 
 .message {
     margin-top: 10px;
     font-weight: bold;
+    text-align: center;
 }
 
 .success {
@@ -47,14 +68,37 @@ button {
     color: red;
 }
 
+/* Progress bar */
 #progressBar {
     height: 4px;
     width: 0;
     background: #4caf50;
-    /* green bar */
     position: fixed;
     top: 0;
     left: 0;
     transition: width 0.3s ease;
     z-index: 1000;
+}
+
+/* 📱 Mobile responsiveness */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    form {
+        padding: 12px;
+    }
+
+    input,
+    select,
+    textarea {
+        font-size: 1rem;
+        padding: 12px;
+    }
+
+    button {
+        font-size: 1rem;
+        padding: 14px;
+    }
 }
