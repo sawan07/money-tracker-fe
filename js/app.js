@@ -95,9 +95,13 @@ function updateBalanceDisplay(balance) {
 }
 
 async function fetchBalance(month) {
+    console.log("Fetching balance for month:", month); // Debug
+
     try {
         const res = await fetch(`${API_URL}?month=${encodeURIComponent(month)}`);
         const data = await res.json();
+        console.log("API response:", data); // Debug
+
         if (data.status === "ok") {
             updateBalanceDisplay(data.remaining);
         } else {
@@ -107,5 +111,18 @@ async function fetchBalance(month) {
         console.error("Fetch balance failed:", err);
     }
 }
+
+// --- Run after DOM is ready ---
+document.addEventListener("DOMContentLoaded", () => {
+    // Initial fetch
+    const currentMonth = monthSelect.value;
+    fetchBalance(currentMonth);
+
+    // Refetch when month changes
+    monthSelect.addEventListener("change", (e) => {
+        fetchBalance(e.target.value);
+    });
+});
+
 
 
