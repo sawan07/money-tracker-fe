@@ -162,6 +162,20 @@ button:hover {
     margin-bottom: 20px;
 }
 
+#balanceContainer button.refresh-btn {
+    margin-left: 10px;
+    background: #f0f0f0;
+    border: none;
+    padding: 4px 8px;
+    font-size: 1.1rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#balanceContainer button.refresh-btn:hover {
+    background: #e0e0e0;
+}
+
 #remainingBalance.green {
     color: green;
 }

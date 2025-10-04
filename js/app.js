@@ -114,15 +114,23 @@ async function fetchBalance(month) {
 
 // --- Run after DOM is ready ---
 document.addEventListener("DOMContentLoaded", () => {
-    // Initial fetch
     const currentMonth = monthSelect.value;
     fetchBalance(currentMonth);
 
-    // Refetch when month changes
     monthSelect.addEventListener("change", (e) => {
         fetchBalance(e.target.value);
     });
+
+    // ✅ Manual refresh button
+    const refreshBtn = document.getElementById("refreshBalanceBtn");
+    if (refreshBtn) {
+        refreshBtn.addEventListener("click", () => {
+            const month = monthSelect.value;
+            fetchBalance(month);
+        });
+    }
 });
+
 
 
 

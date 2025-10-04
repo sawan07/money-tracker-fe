@@ -11,4 +11,5 @@ document.getElementById("earningForm").addEventListener("submit", async (e) => {
     msg.textContent = "Earning added ✅";
     msg.className = "message success";
     e.target.reset();
+    fetchBalance(month);
 });

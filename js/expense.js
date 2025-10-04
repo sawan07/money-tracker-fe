@@ -11,5 +11,6 @@ document.getElementById("expenseForm").addEventListener("submit", async (e) => {
     msg.textContent = "Expense added ✅";
     msg.className = "message success";
     e.target.reset();
+    fetchBalance(month);
 });
 
