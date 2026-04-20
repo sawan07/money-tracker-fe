@@ -2,50 +2,54 @@ let rawChartData = {};
 let pieChartInst = null;
 let trendChartInst = null;
 
-// 1. Expanded color palette to prevent repeats
+// 1. Expanded color palette for the Pie Chart
 const chartColors = [
     '#4caf50', '#2196f3', '#ff9800', '#f44336', '#9c27b0',
     '#795548', '#00bcd4', '#607d8b', '#e91e63', '#3f51b5',
     '#009688', '#8bc34a', '#ffc107', '#ff5722', '#673ab7'
 ];
 
-// 2. Helper to format "Wed Apr 01..." into "April 2026"
+// 2. Helper to generate a random hex color for the Trend Graph
+function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+// 3. Helper to format "Wed Apr 01..." into "April 2026"
 function formatMonthLabel(dateStr) {
     const d = new Date(dateStr);
-    // Use 'en-GB' for UK specific formatting
-    return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+    return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }); //
 }
 
 async function initAnalytics() {
     try {
-        const res = await fetch(`${API_URL}?action=getChartData`);
+        const res = await fetch(`${API_URL}?action=getChartData`); //
         const result = await res.json();
-        if (result.status !== "ok") {
-            console.error("Data fetch failed:", result.message);
-            return;
-        }
+        if (result.status !== "ok") return;
 
-        rawChartData = result.data;
+        rawChartData = result.data; //
 
-        // Sort months: Oldest to Newest for the Trend
         const sortedMonthKeys = Object.keys(rawChartData).sort((a, b) => new Date(a) - new Date(b));
         const newestMonth = sortedMonthKeys[sortedMonthKeys.length - 1];
 
-        // Populate Pie Month Dropdown with clean names
+        // Populate Pie Month Dropdown
         const pieSelect = document.getElementById("pieMonthSelect");
         if (pieSelect) {
-            pieSelect.innerHTML = ""; // Clear existing to prevent duplicates
+            pieSelect.innerHTML = "";
             [...sortedMonthKeys].reverse().forEach(m => {
                 const opt = document.createElement("option");
                 opt.value = m;
-                opt.textContent = formatMonthLabel(m); // Apply formatting
+                opt.textContent = formatMonthLabel(m);
                 pieSelect.appendChild(opt);
             });
-
             pieSelect.addEventListener("change", (e) => renderPieChart(e.target.value));
         }
 
-        // Populate Category Dropdown for the second graph
+        // Populate Category Dropdown
         populateCategoryDropdown(sortedMonthKeys);
 
         // Initial Render
@@ -66,21 +70,17 @@ function populateCategoryDropdown(months) {
     const trendSelect = document.getElementById("trendCategorySelect");
     if (!trendSelect) return;
 
-    // Reset dropdown to just "Total Spending"
     trendSelect.innerHTML = '<option value="Total">Total Spending</option>';
-
     const allCategories = new Set();
     months.forEach(m => {
         const monthData = rawChartData[m];
         if (monthData) {
             Object.keys(monthData).forEach(cat => {
-                // Ensure we don't add "Total" twice and handle empty keys
                 if (cat && cat !== "Total") allCategories.add(cat);
             });
         }
     });
 
-    // Sort alphabetically for better UX
     Array.from(allCategories).sort().forEach(cat => {
         const opt = document.createElement("option");
         opt.value = opt.textContent = cat;
@@ -125,15 +125,18 @@ function renderTrendChart(months, filterCategory) {
         return rawChartData[m][filterCategory] || 0;
     });
 
+    // Generate a random color for this specific render
+    const randomLineColor = getRandomColor();
+
     trendChartInst = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: months.map(m => formatMonthLabel(m)), // Apply formatting to X-axis
+            labels: months.map(m => formatMonthLabel(m)),
             datasets: [{
                 label: filterCategory === "Total" ? "Total Spending (£)" : `${filterCategory} (£)`,
                 data: dataPoints,
-                borderColor: '#4caf50',
-                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                borderColor: randomLineColor, // New random color for the line
+                backgroundColor: randomLineColor + '22', // Same color with 13% opacity for fill
                 fill: true,
                 tension: 0.3
             }]
@@ -143,7 +146,7 @@ function renderTrendChart(months, filterCategory) {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        callback: function (value) { return '£' + value; } // Add GBP symbol
+                        callback: function (value) { return '£' + value; } //
                     }
                 }
             }
