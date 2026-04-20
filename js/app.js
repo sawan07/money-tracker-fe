@@ -20,12 +20,17 @@ function generateMonths() {
 
 function populateMonthDropdown() {
     const months = generateMonths();
+    const monthSelect = document.getElementById("monthSelect"); // cite: 4
+
+    // Safety check: if the element isn't on this page, stop here
+    if (!monthSelect) return;
+
     months.forEach(m => {
         const option = document.createElement("option");
         option.value = m.label;
         option.textContent = m.label;
         if (m.isCurrent) option.selected = true;
-        monthSelect.appendChild(option);
+        monthSelect.appendChild(option); // cite: 4
     });
 }
 
@@ -114,19 +119,22 @@ async function fetchBalance(month) {
 
 // --- Run after DOM is ready ---
 document.addEventListener("DOMContentLoaded", () => {
-    const currentMonth = monthSelect.value;
-    fetchBalance(currentMonth);
+    const monthSelect = document.getElementById("monthSelect"); // cite: 4
 
-    monthSelect.addEventListener("change", (e) => {
-        fetchBalance(e.target.value);
-    });
+    if (monthSelect) {
+        const currentMonth = monthSelect.value;
+        fetchBalance(currentMonth); // cite: 4
 
-    // ✅ Manual refresh button
-    const refreshBtn = document.getElementById("refreshBalanceBtn");
+        monthSelect.addEventListener("change", (e) => {
+            fetchBalance(e.target.value); // cite: 4
+        });
+    }
+
+    const refreshBtn = document.getElementById("refreshBalanceBtn"); // cite: 4
     if (refreshBtn) {
         refreshBtn.addEventListener("click", () => {
-            const month = monthSelect.value;
-            fetchBalance(month);
+            const month = monthSelect ? monthSelect.value : "";
+            if (month) fetchBalance(month); // cite: 4
         });
     }
 });

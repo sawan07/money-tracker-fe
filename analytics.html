@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="nav-logo">Money Tracker</div>
+        <button class="burger" id="burgerBtn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <ul class="nav-menu" id="navMenu">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="analytics.html">Analytics</a></li>
+        </ul>
+    </div>
+</nav>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Analytics - Money Tracker</title>
+    <link rel="stylesheet" href="assets/style.css?v=2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div id="lockOverlay" style="display:none">
+        <div id="lockBox">
+            <h2>Unlock Analytics</h2>
+            <button id="unlockBtn">Unlock</button>
+        </div>
+    </div>
+
+    <h1>Spending Analytics</h1>
+    <div class="nav-links" style="text-align: center; margin-bottom: 20px;">
+        <a href="index.html" style="color: #4caf50; font-weight: bold; text-decoration: none;">← Back to Tracker</a>
+    </div>
+
+    <div class="chart-card">
+        <h3>Category Breakdown</h3>
+        <label>Select Month:</label>
+        <select id="pieMonthSelect"></select>
+        <canvas id="categoryPieChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+        <h3>Monthly Spending Trend</h3>
+        <canvas id="trendLineChart"></canvas>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/biometric.js"></script>
+    <script src="js/analytics.js"></script>
+</body>
+
+</html>
