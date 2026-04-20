@@ -1,4 +1,19 @@
 let rawChartData = {};
+let pieChartInst = null;
+let trendChartInst = null;
+
+// 1. Expanded color palette to prevent repeats
+const chartColors = [
+    '#4caf50', '#2196f3', '#ff9800', '#f44336', '#9c27b0',
+    '#795548', '#00bcd4', '#607d8b', '#e91e63', '#3f51b5',
+    '#009688', '#8bc34a', '#ffc107', '#ff5722', '#673ab7'
+];
+
+// 2. Helper to format "Wed Apr 01..." into "April 2026"
+function formatMonthLabel(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+}
 
 async function initAnalytics() {
     const res = await fetch(`${API_URL}?action=getChartData`);
@@ -6,63 +21,80 @@ async function initAnalytics() {
     if (result.status !== "ok") return;
 
     rawChartData = result.data;
-    // Sort months: Recent to Old
-    const months = Object.keys(rawChartData).sort((a, b) => new Date(b) - new Date(a));
 
+    // Sort months: Oldest to Newest for the Trend, Newest for the Pie
+    const sortedMonthKeys = Object.keys(rawChartData).sort((a, b) => new Date(a) - new Date(b));
+    const newestMonth = sortedMonthKeys[sortedMonthKeys.length - 1];
+
+    // Populate Pie Month Dropdown with clean names
     const pieSelect = document.getElementById("pieMonthSelect");
-    months.forEach(m => {
+    [...sortedMonthKeys].reverse().forEach(m => {
         const opt = document.createElement("option");
-        opt.value = opt.textContent = m;
+        opt.value = m;
+        opt.textContent = formatMonthLabel(m);
         pieSelect.appendChild(opt);
     });
 
-    renderPieChart(months[0]);
-    renderTrendChart(months);
+    // Populate Category Dropdown for the second graph
+    populateCategoryDropdown(sortedMonthKeys);
 
+    // Initial Render
+    renderPieChart(newestMonth);
+    renderTrendChart(sortedMonthKeys, "Total");
+
+    // Listeners
     pieSelect.addEventListener("change", (e) => renderPieChart(e.target.value));
+
+    const trendSelect = document.getElementById("trendCategorySelect");
+    if (trendSelect) {
+        trendSelect.addEventListener("change", (e) => renderTrendChart(sortedMonthKeys, e.target.value));
+    }
 }
 
-function renderPieChart(month) {
-    const data = rawChartData[month];
-    const ctx = document.getElementById('categoryPieChart').getContext('2d');
-    if (window.pieChartInst) window.pieChartInst.destroy();
+function populateCategoryDropdown(months) {
+    const trendSelect = document.getElementById("trendCategorySelect");
+    if (!trendSelect) return;
 
-    window.pieChartInst = new Chart(ctx, {
+    const allCategories = new Set();
+    months.forEach(m => {
+        Object.keys(rawChartData[m]).forEach(cat => allCategories.add(cat));
+    });
+
+    allCategories.forEach(cat => {
+        const opt = document.createElement("option");
+        opt.value = opt.textContent = cat;
+        trendSelect.appendChild(opt);
+    });
+}
+
+function renderPieChart(monthKey) {
+    const data = rawChartData[monthKey];
+    const ctx = document.getElementById('categoryPieChart').getContext('2d');
+    if (pieChartInst) pieChartInst.destroy();
+
+    pieChartInst = new Chart(ctx, {
         type: 'pie',
         data: {
             labels: Object.keys(data),
             datasets: [{
                 data: Object.values(data),
-                backgroundColor: ['#4caf50', '#2196f3', '#ff9800', '#f44336', '#9c27b0', '#795548']
+                backgroundColor: chartColors // Fixed repetitive colors
             }]
+        },
+        options: {
+            plugins: {
+                title: { display: true, text: `Spending breakdown for ${formatMonthLabel(monthKey)}` }
+            }
         }
     });
 }
 
-function renderTrendChart(months) {
+function renderTrendChart(months, filterCategory) {
     const ctx = document.getElementById('trendLineChart').getContext('2d');
-    // Line chart shows months ordered recent to old as requested
-    const totals = months.map(m => Object.values(rawChartData[m]).reduce((a, b) => a + b, 0));
+    if (trendChartInst) trendChartInst.destroy();
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: months,
-            datasets: [{
-                label: 'Total Spending (£)',
-                data: totals,
-                borderColor: '#4caf50',
-                backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                fill: true,
-                tension: 0.3
-            }]
+    const dataPoints = months.map(m => {
+        if (filterCategory === "Total") {
+            return Object.values(rawChartData[m]).reduce((a, b) => a + b, 0);
         }
-    });
-}
-
-// Ensure charts only load after biometric unlock
-const originalHideOverlay = hideLockOverlay;
-hideLockOverlay = function () {
-    originalHideOverlay();
-    initAnalytics();
-};
+        return rawChartData[m][filterCategory] || 0;
