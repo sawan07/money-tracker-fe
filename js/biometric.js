@@ -28,28 +28,26 @@ async function registerBiometric() {
         return;
     }
     try {
-        // Create a (client-side) random challenge
         const challenge = window.crypto.getRandomValues(new Uint8Array(32));
 
         const publicKey = {
             challenge: challenge,
             rp: { name: "Money Tracker" },
             user: {
-                id: str2ab("local-user-id"), // arbitrary local id
+                id: str2ab("local-user-id"),
                 name: "local-user",
                 displayName: "Local User"
             },
-            pubKeyCredParams: [{ type: "public-key", alg: -7 }], // ES256
+            pubKeyCredParams: [{ type: "public-key", alg: -7 }],
             timeout: 60000,
             authenticatorSelection: {
-                authenticatorAttachment: "platform", // prefer platform authenticator => Face ID / Touch ID
+                authenticatorAttachment: "platform",
                 userVerification: "preferred"
             },
             attestation: "none"
         };
 
         const cred = await navigator.credentials.create({ publicKey });
-        // Store credential id locally (base64)
         const rawId = cred.rawId;
         const idHex = buf2hex(rawId);
         localStorage.setItem(LOCK_KEY, idHex);
@@ -71,12 +69,10 @@ async function authenticateBiometric() {
         const idHex = localStorage.getItem(LOCK_KEY);
         let allowCreds = undefined;
         if (idHex) {
-            // convert hex id back to Uint8Array
             const idBytes = new Uint8Array(idHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
             allowCreds = [{ id: idBytes.buffer, type: "public-key", transports: ["internal"] }];
         }
 
-        // server-style challenge (client-generated random)
         const challenge = window.crypto.getRandomValues(new Uint8Array(32));
 
         const publicKey = {
@@ -86,11 +82,7 @@ async function authenticateBiometric() {
             userVerification: "preferred"
         };
 
-        // this will trigger Face ID / Touch ID prompt
         const assertion = await navigator.credentials.get({ publicKey });
-
-        // If we got here without throwing, user authenticated successfully.
-        // NOTE: we are not sending assertion to server for verification (client-only flow).
         console.log("assertion ok", assertion);
         return true;
     } catch (err) {
@@ -101,28 +93,41 @@ async function authenticateBiometric() {
 
 // Hook up buttons and auto-lock on load
 document.addEventListener("DOMContentLoaded", () => {
-    // If no credential saved, show overlay with register option
     const cred = localStorage.getItem(LOCK_KEY);
+    // NEW: Check if already unlocked in this session
+    const isUnlocked = sessionStorage.getItem("isUnlocked") === "true";
     const registerBtn = document.getElementById("registerBtn");
     const unlockBtn = document.getElementById("unlockBtn");
 
     if (!cred) {
         showLockOverlay();
+    } else if (isUnlocked) {
+        // Already authenticated this session, hide the overlay immediately
+        hideLockOverlay();
     } else {
-        // We can attempt immediate prompt on load:
         showLockOverlay();
+        // Attempt immediate prompt on load
         authenticateBiometric().then(ok => {
-            if (ok) hideLockOverlay();
-            else showLockOverlay(); // keep showing overlay
+            if (ok) {
+                sessionStorage.setItem("isUnlocked", "true");
+                hideLockOverlay();
+            } else {
+                showLockOverlay();
+            }
         });
     }
 
     if (registerBtn) registerBtn.addEventListener("click", async () => {
         await registerBiometric();
     });
+
     if (unlockBtn) unlockBtn.addEventListener("click", async () => {
         const ok = await authenticateBiometric();
-        if (ok) hideLockOverlay();
-        else alert("Authentication failed or cancelled.");
+        if (ok) {
+            sessionStorage.setItem("isUnlocked", "true");
+            hideLockOverlay();
+        } else {
+            alert("Authentication failed or cancelled.");
+        }
     });
 });

@@ -23,8 +23,8 @@ h2 {
     padding: 0.8rem 1rem;
     position: sticky;
     top: 0;
-    z-index: 1500;
-    /* Just below lock overlay (2000) */
+    z-index: 2500;
+    /* Increased to be above lockOverlay */
     margin-bottom: 20px;
     border-radius: 0 0 10px 10px;
 }
