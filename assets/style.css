@@ -1,32 +1,51 @@
-/* Global styles */
+:root {
+    --bg: #f3f7ff;
+    --card: #ffffff;
+    --text: #14213d;
+    --subtle: #52607a;
+    --primary: #3559e0;
+    --primary-strong: #2646bf;
+    --success: #0d9f6e;
+    --danger: #d33651;
+    --border: #dce4f5;
+}
+
+* {
+    box-sizing: border-box;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    max-width: 600px;
-    margin: auto;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    max-width: 860px;
+    margin: 0 auto;
     padding: 20px;
-    background: #fafafa;
-    color: #333;
+    background: radial-gradient(circle at top right, #eaf0ff 0%, var(--bg) 42%, #eef4ff 100%);
+    color: var(--text);
 }
 
 h1,
 h2 {
     text-align: center;
-    margin-bottom: 20px;
-    font-weight: 600;
-    color: #222;
+    margin: 12px 0;
+    font-weight: 700;
 }
 
-/* --- NAVIGATION SYSTEM --- */
+.subtitle {
+    text-align: center;
+    color: var(--subtle);
+    margin: 0 0 22px;
+}
+
 .navbar {
-    background: #4caf50;
-    color: white;
-    padding: 0.8rem 1rem;
+    background: linear-gradient(135deg, #3f62ea, #2f52d6);
+    color: #fff;
+    padding: 0.9rem 1rem;
     position: sticky;
     top: 0;
     z-index: 2500;
-    /* Increased to be above lockOverlay */
-    margin-bottom: 20px;
-    border-radius: 0 0 10px 10px;
+    margin-bottom: 22px;
+    border-radius: 0 0 14px 14px;
+    box-shadow: 0 10px 25px rgba(47, 82, 214, 0.25);
 }
 
 .nav-container {
@@ -36,28 +55,33 @@ h2 {
 }
 
 .nav-logo {
-    font-weight: bold;
+    font-weight: 700;
     font-size: 1.1rem;
+    letter-spacing: 0.2px;
 }
 
 .nav-menu {
     display: flex;
     list-style: none;
-    gap: 20px;
+    gap: 18px;
     margin: 0;
     padding: 0;
 }
 
 .nav-menu a {
-    color: white;
+    color: #fff;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
+    opacity: 0.95;
 }
 
-/* Burger Button */
+.nav-menu a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
 .burger {
     display: none;
-    /* Desktop hidden */
     flex-direction: column;
     gap: 4px;
     background: none;
@@ -65,7 +89,6 @@ h2 {
     cursor: pointer;
     padding: 5px;
     width: auto;
-    /* Overrides global button width */
     margin-top: 0;
 }
 
@@ -73,125 +96,214 @@ h2 {
     display: block;
     width: 22px;
     height: 2px;
-    background: white;
+    background: #fff;
     border-radius: 2px;
 }
 
-/* Progress bar */
 #progressBar {
-    height: 4px;
+    height: 3px;
     width: 0;
-    background: #4caf50;
+    background: #6ed4a9;
     position: fixed;
     top: 0;
     left: 0;
     transition: width 0.3s ease;
-    z-index: 2500;
-    /* Always on top */
+    z-index: 3000;
 }
 
-/* Form & Card containers */
 form,
-.chart-card {
-    border: 1px solid #e0e0e0;
+.chart-card,
+.transactions-card {
+    border: 1px solid var(--border);
     padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 25px;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-radius: 14px;
+    margin-bottom: 24px;
+    background: var(--card);
+    box-shadow: 0 10px 24px rgba(24, 38, 89, 0.06);
 }
 
-.chart-card h3 {
+.chart-card h3,
+.transactions-card h3 {
     margin-top: 0;
-    font-size: 1.1rem;
-    color: #222;
+    font-size: 1.06rem;
 }
 
-/* Labels & Inputs */
 label {
     display: block;
-    margin-bottom: 6px;
-    font-size: 0.9rem;
-    color: #333;
-    font-weight: 500;
+    margin-bottom: 8px;
+    font-size: 0.94rem;
+    color: var(--text);
+    font-weight: 600;
 }
 
 input,
 select,
 textarea {
     width: 100%;
-    padding: 12px 14px;
+    padding: 11px 12px;
     margin-bottom: 16px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 1rem;
+    border: 1px solid #cfd9f0;
+    border-radius: 10px;
+    font-size: 0.98rem;
     outline: none;
-    box-sizing: border-box;
     transition: border-color 0.2s, box-shadow 0.2s;
+    background: #fbfdff;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-    border-color: #4caf50;
-    box-shadow: 0 0 4px rgba(76, 175, 80, 0.3);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(53, 89, 224, 0.15);
 }
 
-/* Buttons */
 button {
-    margin-top: 5px;
-    padding: 14px;
+    margin-top: 4px;
+    padding: 12px 14px;
     width: 100%;
     border: none;
-    border-radius: 8px;
-    background: #4caf50;
-    color: white;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary), #4a6bf3);
+    color: #fff;
     font-size: 1rem;
-    font-weight: bold;
+    font-weight: 700;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: transform 0.1s ease, background 0.2s ease;
 }
 
 button:hover {
-    background: #43a047;
+    background: linear-gradient(135deg, var(--primary-strong), var(--primary));
+    transform: translateY(-1px);
 }
 
-/* Balance container styles */
+.message.success {
+    margin-top: 10px;
+    color: var(--success);
+    font-weight: 600;
+}
+
 #balanceContainer {
     text-align: center;
-    font-size: 1.3rem;
-    font-weight: bold;
+    font-size: 1.35rem;
+    font-weight: 700;
     margin-bottom: 20px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
 }
 
-#balanceContainer button.refresh-btn {
+#balanceContainer .refresh-btn,
+.transactions-header .refresh-btn {
     margin-left: 10px;
-    background: #f0f0f0;
-    border: none;
-    padding: 4px 8px;
-    font-size: 1.1rem;
-    border-radius: 6px;
+    background: #eef2ff;
+    color: #2f4fc9;
+    border: 1px solid #d7e0ff;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    border-radius: 8px;
     cursor: pointer;
     width: auto;
 }
 
 #remainingBalance.green {
-    color: green;
+    color: var(--success);
 }
 
 #remainingBalance.red {
-    color: red;
+    color: var(--danger);
 }
 
-/* Lock Overlay */
+.transactions-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.transactions-list {
+    display: grid;
+    gap: 10px;
+}
+
+.tx-item {
+    border: 1px solid #e3eafc;
+    border-radius: 10px;
+    padding: 12px;
+    background: #fbfdff;
+}
+
+.tx-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 7px;
+}
+
+.tx-type {
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.type-expense {
+    color: #a8233b;
+    background: #ffe6eb;
+}
+
+.type-earning {
+    color: #0d7d56;
+    background: #dff9ef;
+}
+
+.tx-amount {
+    font-weight: 700;
+}
+
+.amount-expense {
+    color: var(--danger);
+}
+
+.amount-earning {
+    color: var(--success);
+}
+
+.tx-main {
+    font-weight: 600;
+}
+
+.tx-meta {
+    display: flex;
+    justify-content: space-between;
+    color: var(--subtle);
+    font-size: 0.86rem;
+    margin: 6px 0;
+}
+
+.tx-note {
+    color: #4d5871;
+    font-size: 0.9rem;
+}
+
+.empty-state {
+    border: 1px dashed #cfd9f0;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    color: var(--subtle);
+    background: #f8faff;
+}
+
 #lockOverlay {
     position: fixed;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.8);
-    /* Darkened for focus */
+    background: rgba(14, 22, 49, 0.78);
     z-index: 2000;
 }
 
@@ -199,15 +311,14 @@ button:hover {
     background: #fff;
     padding: 20px;
     border-radius: 12px;
-    max-width: 320px;
+    max-width: 340px;
     text-align: center;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.25);
 }
 
-/* Mobile responsiveness */
 @media (max-width: 768px) {
     body {
-        padding: 10px;
+        padding: 12px;
     }
 
     .burger {
@@ -216,32 +327,28 @@ button:hover {
 
     .nav-menu {
         display: none;
-        /* Hidden by default on mobile */
         flex-direction: column;
         position: absolute;
         top: 100%;
         left: 0;
         width: 100%;
-        background: #43a047;
-        padding: 20px;
-        box-sizing: border-box;
-        border-radius: 0 0 10px 10px;
-        gap: 15px;
+        background: #2f52d6;
+        padding: 18px;
+        border-radius: 0 0 12px 12px;
+        gap: 14px;
     }
 
     .nav-menu.active {
         display: flex;
     }
 
-    form,
-    .chart-card {
-        padding: 15px;
+    .transactions-header {
+        flex-direction: column;
+        align-items: stretch;
     }
 
-    input,
-    select,
-    textarea,
-    button {
-        font-size: 1rem;
+    .transactions-header .refresh-btn {
+        margin-left: 0;
+        width: 100%;
     }
 }
