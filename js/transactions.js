@@ -44,6 +44,7 @@ async function loadLatestTransactions() {
                     </div>
                     <div class="tx-main">${item.categoryOrSource || "-"}</div>
                     <div class="tx-meta">
+                        <span>${item.month || "-"}</span>
                         <span>${txDate}</span>
                     </div>
                     <div class="tx-note">${note}</div>
