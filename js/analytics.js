@@ -95,12 +95,19 @@ function renderPieChart(monthKey) {
 
     if (pieChartInst) pieChartInst.destroy();
 
+    const sortedCategoryEntries = Object.entries(data)
+        .map(([category, amount]) => [category, Number(amount) || 0])
+        .sort((a, b) => b[1] - a[1]);
+
+    const pieLabels = sortedCategoryEntries.map(([category, amount]) => `${category} (£${amount.toFixed(2)})`);
+    const pieValues = sortedCategoryEntries.map(([, amount]) => amount);
+
     pieChartInst = new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: Object.keys(data),
+            labels: pieLabels,
             datasets: [{
-                data: Object.values(data),
+                data: pieValues,
                 backgroundColor: chartColors
             }]
         },
