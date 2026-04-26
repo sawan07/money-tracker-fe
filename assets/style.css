@@ -227,6 +227,33 @@ button:hover {
     gap: 10px;
 }
 
+.tx-group {
+    display: grid;
+    gap: 8px;
+}
+
+.tx-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #dde5fb;
+    background: #f2f6ff;
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.tx-group-date {
+    font-weight: 700;
+    color: #233a84;
+}
+
+.tx-group-total {
+    font-weight: 700;
+    color: var(--danger);
+    font-size: 0.92rem;
+}
+
 .tx-item {
     border: 1px solid #e3eafc;
     border-radius: 10px;
@@ -350,5 +377,10 @@ button:hover {
     .transactions-header .refresh-btn {
         margin-left: 0;
         width: 100%;
+    }
+
+    .tx-group-header {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
