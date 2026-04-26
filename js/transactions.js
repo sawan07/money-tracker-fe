@@ -6,10 +6,20 @@ async function loadLatestTransactions() {
 
     try {
         const res = await fetch(`${API_URL}?action=getLatestTransactions`);
-        const result = await res.json();
+        const responseText = await res.text();
+        let result = null;
+
+        try {
+            result = JSON.parse(responseText);
+        } catch (parseErr) {
+            console.error("Transactions response is not JSON:", responseText);
+            listEl.innerHTML = '<div class="empty-state">Unexpected API response. Please hard refresh and try again.</div>';
+            return;
+        }
 
         if (result.status !== "ok") {
-            listEl.innerHTML = '<div class="empty-state">Could not load transactions.</div>';
+            const apiMsg = result.message ? ` (${result.message})` : "";
+            listEl.innerHTML = `<div class="empty-state">Could not load transactions${apiMsg}</div>`;
             return;
         }
 
