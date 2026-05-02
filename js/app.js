@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbwW83kexIJ0nDfnWklF_DrXM7S7CoXVUGW8F4vKgcE4RlNupzB1ekTGAGENWhD2ciOWTg/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbz-LM0EP1qQYoF3iMF_4Avuy8B0LT-xagAE8lU5EayRWC6uwI5B6i-Z0hEFKAdbsAPRQg/exec";
 
 // Month generation
 const monthSelect = document.getElementById("monthSelect");

@@ -14,23 +14,42 @@ function doPost(e) {
     var sheet = ss.getSheetByName(month);
     if (!sheet) return jsonResponse({status: "error", message: "Month tab not found: " + month});
 
+    var catNorm = category.toString().trim().toLowerCase();
+    var srcNorm = source.toString().trim().toLowerCase();
+
     if (type === "expense") {
       var values = sheet.getRange("A:A").getValues();
       for (var i = 0; i < values.length; i++) {
-        if (values[i][0] && values[i][0].toString().toLowerCase() === category.toLowerCase()) {
-          var currentValue = sheet.getRange(i+1, 3).getValue(); 
+        if (values[i][0] && values[i][0].toString().trim().toLowerCase() === catNorm) {
+          var currentValue = sheet.getRange(i+1, 3).getValue();
           sheet.getRange(i+1, 3).setValue((parseFloat(currentValue) || 0) + amount);
           break;
         }
       }
     } else if (type === "earning") {
       var values = sheet.getRange("J:J").getValues();
+      var earningFound = false;
       for (var j = 0; j < values.length; j++) {
-        if (values[j][0] && values[j][0].toString().toLowerCase() === source.toLowerCase()) {
-          var currentValue = sheet.getRange(j+1, 11).getValue(); 
+        if (values[j][0] && values[j][0].toString().trim().toLowerCase() === srcNorm) {
+          var currentValue = sheet.getRange(j+1, 11).getValue();
           sheet.getRange(j+1, 11).setValue((parseFloat(currentValue) || 0) + amount);
+          earningFound = true;
           break;
         }
+      }
+      if (!earningFound) {
+        var insertEarn = -1;
+        for (var ej = 0; ej < values.length; ej++) {
+          if (!values[ej][0] || values[ej][0].toString().trim() === "") {
+            insertEarn = ej + 1;
+            break;
+          }
+        }
+        if (insertEarn === -1) {
+          insertEarn = sheet.getLastRow() + 1;
+        }
+        sheet.getRange(insertEarn, 10).setValue(source);
+        sheet.getRange(insertEarn, 11).setValue(amount);
       }
     }
 
