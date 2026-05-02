@@ -117,12 +117,21 @@ function doGet(e) {
       return jsonResponse({status: "ok", data: transactions});
     }
 
-    // 3. Handle Home Page Balance
+    // 3. Handle Home Page Balance (E13/F13/G13 — Left, Scheduled Left, Forecast Left)
     if (month) {
       var sheet = ss.getSheetByName(month);
       if (!sheet) return jsonResponse({status: "error", message: "Month tab not found"});
-      var remaining = sheet.getRange("E13").getValue();
-      return jsonResponse({status: "ok", month: month, remaining: remaining});
+      var left = sheet.getRange("E13").getValue();
+      var scheduledLeft = sheet.getRange("F13").getValue();
+      var forecastLeft = sheet.getRange("G13").getValue();
+      return jsonResponse({
+        status: "ok",
+        month: month,
+        remaining: left,
+        left: left,
+        scheduledLeft: scheduledLeft,
+        forecastLeft: forecastLeft
+      });
     }
 
     return jsonResponse({status: "error", message: "Missing parameters"});

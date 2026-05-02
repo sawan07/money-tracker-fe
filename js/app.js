@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbz-LM0EP1qQYoF3iMF_4Avuy8B0LT-xagAE8lU5EayRWC6uwI5B6i-Z0hEFKAdbsAPRQg/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxbq_R_BZeXNxVPLAjvVcuJCPF0eed2uEwxzZcTX2PU_yUtt-Z4O6ttVQaQKnj6dWnP1g/exec";
 
 // Month generation
 const monthSelect = document.getElementById("monthSelect");
@@ -82,20 +82,50 @@ function finishProgress() {
     }, 400);
 }
 
-function updateBalanceDisplay(balance) {
-    const balanceEl = document.getElementById("remainingBalance");
+function parseMoneyValue(raw) {
+    if (raw === undefined || raw === null || raw === "") return 0;
+    const n = parseFloat(raw.toString().replace(/[^\d.-]/g, ""));
+    return Number.isFinite(n) ? n : 0;
+}
 
-    // Ensure balance is a number
-    let numericBalance = parseFloat(balance.toString().replace(/[^\d.-]/g, "")) || 0;
+function formatMoney(numeric) {
+    return `£${numeric.toFixed(2)}`;
+}
 
-    balanceEl.textContent = `£${numericBalance.toFixed(2)}`;
-
-    if (numericBalance < 100) {
-        balanceEl.classList.remove("green");
-        balanceEl.classList.add("red");
+function applyLeftStatColor(el, numeric, mode) {
+    el.classList.remove("green", "red");
+    if (mode === "threshold100") {
+        if (numeric < 100) el.classList.add("red");
+        else el.classList.add("green");
     } else {
-        balanceEl.classList.remove("red");
-        balanceEl.classList.add("green");
+        if (numeric < 0) el.classList.add("red");
+        else el.classList.add("green");
+    }
+}
+
+function updateLeftSummaryDisplay(data) {
+    const leftEl = document.getElementById("remainingBalance");
+    const scheduledEl = document.getElementById("scheduledLeftBalance");
+    const forecastEl = document.getElementById("forecastLeftBalance");
+
+    const leftRaw = data.left !== undefined ? data.left : data.remaining;
+    const leftNum = parseMoneyValue(leftRaw);
+
+    if (leftEl) {
+        leftEl.textContent = formatMoney(leftNum);
+        applyLeftStatColor(leftEl, leftNum, "threshold100");
+    }
+
+    const scheduledNum = parseMoneyValue(data.scheduledLeft);
+    if (scheduledEl) {
+        scheduledEl.textContent = formatMoney(scheduledNum);
+        applyLeftStatColor(scheduledEl, scheduledNum, "signed");
+    }
+
+    const forecastNum = parseMoneyValue(data.forecastLeft);
+    if (forecastEl) {
+        forecastEl.textContent = formatMoney(forecastNum);
+        applyLeftStatColor(forecastEl, forecastNum, "signed");
     }
 }
 
@@ -108,7 +138,7 @@ async function fetchBalance(month) {
         console.log("API response:", data); // Debug
 
         if (data.status === "ok") {
-            updateBalanceDisplay(data.remaining);
+            updateLeftSummaryDisplay(data);
         } else {
             console.error("Balance error:", data.message);
         }

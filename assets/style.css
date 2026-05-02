@@ -183,9 +183,9 @@ button:hover {
 }
 
 #balanceContainer {
-    text-align: center;
-    font-size: 1.35rem;
-    font-weight: 700;
+    text-align: left;
+    font-size: 1rem;
+    font-weight: 400;
     margin-bottom: 20px;
     background: #fff;
     border: 1px solid var(--border);
@@ -193,9 +193,56 @@ button:hover {
     padding: 16px;
 }
 
+.left-summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.left-summary-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--subtle);
+}
+
+.left-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.left-stat {
+    border: 1px solid #e3eafc;
+    border-radius: 10px;
+    padding: 12px 10px;
+    background: #fbfdff;
+    text-align: center;
+    min-width: 0;
+}
+
+.left-stat-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    line-height: 1.25;
+}
+
+.left-stat-value {
+    display: block;
+    font-size: clamp(1rem, 2.8vw, 1.25rem);
+    font-weight: 700;
+    word-break: break-word;
+}
+
 #balanceContainer .refresh-btn,
 .transactions-header .refresh-btn {
-    margin-left: 10px;
+    margin-left: 0;
+    margin-top: 0;
     background: #eef2ff;
     color: #2f4fc9;
     border: 1px solid #d7e0ff;
@@ -206,11 +253,13 @@ button:hover {
     width: auto;
 }
 
-#remainingBalance.green {
+#remainingBalance.green,
+.left-stat-value.green {
     color: var(--success);
 }
 
-#remainingBalance.red {
+#remainingBalance.red,
+.left-stat-value.red {
     color: var(--danger);
 }
 
@@ -382,5 +431,9 @@ button:hover {
     .tx-group-header {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .left-summary-grid {
+        grid-template-columns: 1fr;
     }
 }

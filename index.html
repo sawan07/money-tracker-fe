@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Money Tracker</title>
-    <link rel="stylesheet" href="assets/style.css?v=3">
+    <link rel="stylesheet" href="assets/style.css?v=4">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
@@ -41,8 +41,24 @@
     <p class="subtitle">Track expenses, earnings, and stay on top of your monthly cash flow.</p>
 
     <div id="balanceContainer">
-        Remaining: <span id="remainingBalance">£0.00</span>
-        <button id="refreshBalanceBtn" class="refresh-btn">🔄</button>
+        <div class="left-summary-header">
+            <span class="left-summary-title">Month overview</span>
+            <button id="refreshBalanceBtn" type="button" class="refresh-btn" aria-label="Refresh balances">🔄</button>
+        </div>
+        <div class="left-summary-grid">
+            <div class="left-stat">
+                <span class="left-stat-label">Left</span>
+                <span id="remainingBalance" class="left-stat-value">£0.00</span>
+            </div>
+            <div class="left-stat">
+                <span class="left-stat-label">Scheduled Left</span>
+                <span id="scheduledLeftBalance" class="left-stat-value">£0.00</span>
+            </div>
+            <div class="left-stat">
+                <span class="left-stat-label">Forecast Left</span>
+                <span id="forecastLeftBalance" class="left-stat-value">£0.00</span>
+            </div>
+        </div>
     </div>
 
 
@@ -103,7 +119,7 @@
     </form>
 
     <!-- Scripts -->
-    <script src="js/app.js?v=2"></script>
+    <script src="js/app.js?v=3"></script>
     <script src="js/expense.js?v=2"></script>
     <script src="js/earning.js?v=2"></script>
     <script src="js/biometric.js?v=2"></script>
