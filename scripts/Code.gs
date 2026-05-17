@@ -85,99 +85,15 @@ function parseAmountCell(value, displayValue) {
   return parseAmountValue(displayValue);
 }
 
-function normalizeSheetLabel(value) {
-  return normalizeKey(value).replace(/[^a-z0-9]/g, "");
-}
-
-function classifyExpenseColumns(displayRows) {
-  var columns = {
-    categoryCol: 0,
-    spentCol: 2,
-    potCol: -1,
-    leftCol: -1
-  };
-  var headerRowsToScan = Math.min(displayRows.length, 10);
-
-  for (var r = 0; r < headerRowsToScan; r++) {
-    for (var c = 0; c < displayRows[r].length; c++) {
-      var label = normalizeSheetLabel(displayRows[r][c]);
-      if (!label) continue;
-
-      var isSpent = label.indexOf("spent") !== -1 ||
-        label.indexOf("actual") !== -1 ||
-        label.indexOf("used") !== -1;
-      var isLeft = label.indexOf("left") !== -1 ||
-        label.indexOf("remaining") !== -1 ||
-        label.indexOf("remain") !== -1;
-      var isPot = label.indexOf("pot") !== -1 ||
-        label.indexOf("budget") !== -1 ||
-        label.indexOf("max") !== -1 ||
-        label.indexOf("limit") !== -1 ||
-        label.indexOf("allowance") !== -1;
-
-      if (label.indexOf("category") !== -1) columns.categoryCol = c;
-      if (isSpent && !isLeft) columns.spentCol = c;
-      if (isPot && !isSpent && !isLeft) columns.potCol = c;
-      if (isLeft && columns.leftCol === -1) columns.leftCol = c;
-    }
-  }
-
-  return columns;
-}
-
 function getRowAmount(row, displayRow, col) {
   if (col < 0 || col >= row.length) return 0;
   return parseAmountCell(row[col], displayRow[col]);
 }
 
-function hasCellContent(row, displayRow, col) {
-  if (col < 0 || col >= row.length) return false;
-  return row[col] !== undefined && row[col] !== null && row[col] !== "" ||
-    displayRow[col] !== undefined && displayRow[col] !== null && displayRow[col] !== "";
-}
-
-function inferPotMaxFromExpenseRow(row, displayRow, columns, spent) {
-  var expenseColumnLimit = Math.min(row.length, 9); // Columns before the earnings section (J/K).
-
-  if (columns.potCol !== -1 && columns.potCol !== columns.spentCol &&
-    hasCellContent(row, displayRow, columns.potCol)) {
-    return getRowAmount(row, displayRow, columns.potCol);
-  }
-
-  if (columns.leftCol !== -1 && columns.leftCol !== columns.spentCol &&
-    hasCellContent(row, displayRow, columns.leftCol)) {
-    return spent + getRowAmount(row, displayRow, columns.leftCol);
-  }
-
-  var sameRowAmounts = [];
-  for (var c = 0; c < expenseColumnLimit; c++) {
-    if (c === columns.categoryCol || c === columns.spentCol) continue;
-
-    var amount = getRowAmount(row, displayRow, c);
-    if (amount > 0) {
-      sameRowAmounts.push(amount);
-    }
-  }
-
-  if (!sameRowAmounts.length) return 0;
-
-  sameRowAmounts.sort(function(a, b) { return a - b; });
-
-  for (var i = 0; i < sameRowAmounts.length; i++) {
-    if (sameRowAmounts[i] >= spent) {
-      return sameRowAmounts[i];
-    }
-  }
-
-  // Some monthly sheets store category left rather than pot max next to spent.
-  // In that layout, pot max is the current spent plus the remaining category amount.
-  return spent + sameRowAmounts[sameRowAmounts.length - 1];
-}
-
-function getRecentExpenseCounts(ss, limit) {
+function getExpenseCategoriesFromTransactions(ss, limit) {
   var txSheet = ss.getSheetByName("Transactions");
-  var counts = {};
-  if (!txSheet) return counts;
+  var categoriesByKey = {};
+  if (!txSheet) return [];
 
   var allRows = txSheet.getDataRange().getValues();
   var expenseCount = 0;
@@ -189,49 +105,82 @@ function getRecentExpenseCounts(ss, limit) {
     var categoryKey = normalizeKey(category);
 
     if (type === "expense" && categoryKey) {
-      counts[categoryKey] = (counts[categoryKey] || 0) + 1;
+      categoriesByKey[categoryKey] = categoriesByKey[categoryKey] || {
+        name: category.toString().trim(),
+        recentCount: 0
+      };
+      categoriesByKey[categoryKey].recentCount++;
       expenseCount++;
     }
   }
 
-  return counts;
+  for (var j = allRows.length - 1; j >= 1; j--) {
+    var oldRow = allRows[j];
+    var oldType = normalizeKey(oldRow[2]);
+    var oldCategory = oldRow[4];
+    var oldCategoryKey = normalizeKey(oldCategory);
+
+    if (oldType === "expense" && oldCategoryKey && !categoriesByKey[oldCategoryKey]) {
+      categoriesByKey[oldCategoryKey] = {
+        name: oldCategory.toString().trim(),
+        recentCount: 0
+      };
+    }
+  }
+
+  return Object.keys(categoriesByKey).map(function(key) {
+    return categoriesByKey[key];
+  });
+}
+
+function getMonthlyCategoryDetails(sheet, categoryName) {
+  var defaultDetails = {
+    potMax: 0,
+    spent: 0,
+    left: 0
+  };
+  if (!sheet) return defaultDetails;
+
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 1) return defaultDetails;
+
+  var rows = sheet.getRange(1, 1, lastRow, 4).getValues();
+  var displayRows = sheet.getRange(1, 1, lastRow, 4).getDisplayValues();
+  var categoryKey = normalizeKey(categoryName);
+
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    var displayRow = displayRows[i];
+    var nameCell = row[0] || displayRow[0];
+
+    if (normalizeKey(nameCell) === categoryKey) {
+      var spent = getRowAmount(row, displayRow, 2); // Amount column C
+      var potMax = getRowAmount(row, displayRow, 3); // Pot column D
+
+      return {
+        potMax: potMax,
+        spent: spent,
+        left: potMax - spent
+      };
+    }
+  }
+
+  return defaultDetails;
 }
 
 function getExpenseCategorySummaries(ss, month) {
   var sheet = ss.getSheetByName(month);
   if (!sheet) return null;
 
-  var lastRow = sheet.getLastRow();
-  if (lastRow < 1) return [];
-
-  var lastCol = sheet.getLastColumn();
-  var rows = sheet.getRange(1, 1, lastRow, lastCol).getValues();
-  var displayRows = sheet.getRange(1, 1, lastRow, lastCol).getDisplayValues();
-  var columns = classifyExpenseColumns(displayRows);
-  var recentCounts = getRecentExpenseCounts(ss, 100);
-  var seen = {};
-  var categories = [];
-
-  rows.forEach(function(row, rowIndex) {
-    var displayRow = displayRows[rowIndex];
-    var nameCell = row[columns.categoryCol] || displayRow[columns.categoryCol];
-    var name = nameCell ? nameCell.toString().trim() : "";
-    var key = normalizeKey(name);
-    if (!name || seen[key]) return;
-    if (key === "category" || key === "categories" || key === "expense" ||
-      key === "expenses" || key === "total") return;
-
-    var spent = getRowAmount(row, displayRow, columns.spentCol);
-    var potMax = inferPotMaxFromExpenseRow(row, displayRow, columns, spent);
-
-    seen[key] = true;
-    categories.push({
-      name: name,
-      potMax: potMax,
-      spent: spent,
-      left: potMax - spent,
-      recentCount: recentCounts[key] || 0
-    });
+  var categories = getExpenseCategoriesFromTransactions(ss, 500).map(function(category) {
+    var details = getMonthlyCategoryDetails(sheet, category.name);
+    return {
+      name: category.name,
+      potMax: details.potMax,
+      spent: details.spent,
+      left: details.left,
+      recentCount: category.recentCount
+    };
   });
 
   categories.sort(function(a, b) {
