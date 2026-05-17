@@ -8,6 +8,7 @@ const monthNames = [
 ];
 let expenseCategorySummaries = [];
 let fallbackExpenseCategories = [];
+const LAST_EXPENSE_CATEGORY_KEY = "moneytracker_last_expense_category";
 
 function generateMonths() {
     const now = new Date();
@@ -136,6 +137,8 @@ function updateExpenseCategorySummary(categoryName) {
         return;
     }
 
+    localStorage.setItem(LAST_EXPENSE_CATEGORY_KEY, summary.name);
+
     const nameEl = document.getElementById("categorySummaryName");
     const countEl = document.getElementById("categorySummaryCount");
     const potMaxEl = document.getElementById("categoryPotMax");
@@ -150,8 +153,8 @@ function updateExpenseCategorySummary(categoryName) {
     if (nameEl) nameEl.textContent = summary.name;
     if (countEl) {
         countEl.textContent = recentCount
-            ? `${recentCount} of last 100 spending transactions`
-            : "Not used in last 100";
+            ? `${recentCount} of last 500 spending transactions`
+            : "Not used in last 500";
     }
     if (potMaxEl) potMaxEl.textContent = formatMoney(potMax);
     if (spentEl) spentEl.textContent = formatMoney(spent);
@@ -166,7 +169,8 @@ function renderExpenseCategoryOptions(categories, preferredCategory) {
     const categorySelect = getExpenseCategorySelect();
     if (!categorySelect) return;
 
-    const selectedKey = normalizeCategoryName(preferredCategory || categorySelect.value);
+    const storedCategory = localStorage.getItem(LAST_EXPENSE_CATEGORY_KEY);
+    const selectedKey = normalizeCategoryName(preferredCategory || storedCategory);
     const optionItems = categories.length
         ? categories.map(item => ({ name: item.name }))
         : fallbackExpenseCategories
@@ -180,6 +184,7 @@ function renderExpenseCategoryOptions(categories, preferredCategory) {
     }
 
     categorySelect.innerHTML = "";
+    categorySelect.disabled = false;
     optionItems.forEach(item => {
         const option = document.createElement("option");
         option.value = item.name;
@@ -200,6 +205,8 @@ async function refreshExpenseCategories(month, preferredCategory) {
 
     captureFallbackExpenseCategories();
     setCategorySummaryText("Loading category details...");
+    categorySelect.disabled = true;
+    categorySelect.innerHTML = '<option>Loading categories...</option>';
 
     try {
         const res = await fetch(`${API_URL}?action=getExpenseCategories&month=${encodeURIComponent(month)}`);
