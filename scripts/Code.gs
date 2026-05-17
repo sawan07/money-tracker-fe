@@ -66,6 +66,79 @@ function doPost(e) {
   }
 }
 
+function normalizeKey(value) {
+  return value ? value.toString().trim().toLowerCase() : "";
+}
+
+function parseAmountValue(value) {
+  if (value === undefined || value === null || value === "") return 0;
+  var parsed = parseFloat(value.toString().replace(/[^\d.-]/g, ""));
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+function getRecentExpenseCounts(ss, limit) {
+  var txSheet = ss.getSheetByName("Transactions");
+  var counts = {};
+  if (!txSheet) return counts;
+
+  var allRows = txSheet.getDataRange().getValues();
+  var expenseCount = 0;
+
+  for (var i = allRows.length - 1; i >= 1 && expenseCount < limit; i--) {
+    var row = allRows[i];
+    var type = normalizeKey(row[2]);
+    var category = row[4];
+    var categoryKey = normalizeKey(category);
+
+    if (type === "expense" && categoryKey) {
+      counts[categoryKey] = (counts[categoryKey] || 0) + 1;
+      expenseCount++;
+    }
+  }
+
+  return counts;
+}
+
+function getExpenseCategorySummaries(ss, month) {
+  var sheet = ss.getSheetByName(month);
+  if (!sheet) return null;
+
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 1) return [];
+
+  var rows = sheet.getRange(1, 1, lastRow, 3).getValues();
+  var recentCounts = getRecentExpenseCounts(ss, 100);
+  var seen = {};
+  var categories = [];
+
+  rows.forEach(function(row) {
+    var name = row[0] ? row[0].toString().trim() : "";
+    var key = normalizeKey(name);
+    if (!name || seen[key]) return;
+
+    var potMax = parseAmountValue(row[1]);
+    var spent = parseAmountValue(row[2]);
+
+    seen[key] = true;
+    categories.push({
+      name: name,
+      potMax: potMax,
+      spent: spent,
+      left: potMax - spent,
+      recentCount: recentCounts[key] || 0
+    });
+  });
+
+  categories.sort(function(a, b) {
+    if (b.recentCount !== a.recentCount) {
+      return b.recentCount - a.recentCount;
+    }
+    return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+  });
+
+  return categories;
+}
+
 function doGet(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -91,7 +164,21 @@ function doGet(e) {
       return jsonResponse({status: "ok", data: summary});
     }
 
-    // 2. Handle Latest Transactions List
+    // 2. Handle expense category dropdown order and selected category pot details
+    if (action === "getExpenseCategories") {
+      if (!month) return jsonResponse({status: "error", message: "Missing month"});
+
+      var categories = getExpenseCategorySummaries(ss, month);
+      if (categories === null) return jsonResponse({status: "error", message: "Month tab not found"});
+
+      return jsonResponse({
+        status: "ok",
+        month: month,
+        categories: categories
+      });
+    }
+
+    // 3. Handle Latest Transactions List
     if (action === "getLatestTransactions") {
       var txSheet = ss.getSheetByName("Transactions");
       if (!txSheet) return jsonResponse({status: "ok", data: []});
@@ -117,7 +204,7 @@ function doGet(e) {
       return jsonResponse({status: "ok", data: transactions});
     }
 
-    // 3. Handle Home Page Balance (E13/F13/G13 — Left, Scheduled Left, Forecast Left)
+    // 4. Handle Home Page Balance (E13/F13/G13 — Left, Scheduled Left, Forecast Left)
     if (month) {
       var sheet = ss.getSheetByName(month);
       if (!sheet) return jsonResponse({status: "error", message: "Month tab not found"});
