@@ -209,7 +209,8 @@ async function refreshExpenseCategories(month, preferredCategory) {
     categorySelect.innerHTML = '<option>Loading categories...</option>';
 
     try {
-        const res = await fetch(`${API_URL}?action=getExpenseCategories&month=${encodeURIComponent(month)}`);
+        const categoryUrl = `${API_URL}?action=getExpenseCategories&month=${encodeURIComponent(month)}&_=${Date.now()}`;
+        const res = await fetch(categoryUrl, { cache: "no-store" });
         const data = await res.json();
 
         if (data.status !== "ok" || !Array.isArray(data.categories)) {
