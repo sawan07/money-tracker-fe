@@ -1,0 +1,26 @@
+{
+  "name": "money-tracker-fe",
+  "version": "1.0.0",
+  "description": "A simple frontend for adding monthly expenses and earnings to a Google Sheet backend.",
+  "private": true,
+  "scripts": {
+    "clasp:login": "clasp login --no-localhost",
+    "clasp:status": "clasp status",
+    "clasp:push": "clasp push",
+    "check": "node --check js/app.js && node --check js/expense.js && node --check js/earning.js && node --check js/analytics.js && node --check js/transactions.js && node --check js/biometric.js && node --check js/nav.js && node --check --input-type=commonjs < scripts/Code.gs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sawan07/money-tracker-fe.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sawan07/money-tracker-fe/issues"
+  },
+  "homepage": "https://github.com/sawan07/money-tracker-fe#readme",
+  "devDependencies": {
+    "@google/clasp": "^3.3.0"
+  }
+}
