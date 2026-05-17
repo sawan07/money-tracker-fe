@@ -2,14 +2,12 @@ let rawChartData = {};
 let pieChartInst = null;
 let trendChartInst = null;
 
-// 1. Expanded color palette for the Pie Chart
 const chartColors = [
     '#4caf50', '#2196f3', '#ff9800', '#f44336', '#9c27b0',
     '#795548', '#00bcd4', '#607d8b', '#e91e63', '#3f51b5',
     '#009688', '#8bc34a', '#ffc107', '#ff5722', '#673ab7'
 ];
 
-// 2. Helper to generate a random hex color for the Trend Graph
 function getRandomColor() {
     const letters = '0123456789ABCDEF';
     let color = '#';
@@ -19,19 +17,58 @@ function getRandomColor() {
     return color;
 }
 
-// 3. Helper to format "Wed Apr 01..." into "April 2026"
 function formatMonthLabel(dateStr) {
     const d = new Date(dateStr);
-    return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }); //
+    return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+}
+
+function formatCurrency(amount) {
+    return `£${amount.toFixed(2)}`;
+}
+
+function getChartColor(index) {
+    return chartColors[index % chartColors.length];
+}
+
+function escapeHtml(value) {
+    return value.toString().replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[char]));
+}
+
+function renderPieLegend(entries, total) {
+    const legendEl = document.getElementById("pieLegend");
+    if (!legendEl) return;
+
+    if (!entries.length) {
+        legendEl.innerHTML = '<div class="empty-state">No spending categories for this month.</div>';
+        return;
+    }
+
+    legendEl.innerHTML = entries.map(([category, amount], index) => {
+        const percentage = total > 0 ? ((amount / total) * 100).toFixed(1) : "0.0";
+        return `
+            <div class="legend-item">
+                <span class="legend-color" style="background:${getChartColor(index)}"></span>
+                <span class="legend-name">${escapeHtml(category)}</span>
+                <span class="legend-value">${formatCurrency(amount)}</span>
+                <span class="legend-percent">${percentage}%</span>
+            </div>
+        `;
+    }).join("");
 }
 
 async function initAnalytics() {
     try {
-        const res = await fetch(`${API_URL}?action=getChartData`); //
+        const res = await fetch(`${API_URL}?action=getChartData`);
         const result = await res.json();
         if (result.status !== "ok") return;
 
-        rawChartData = result.data; //
+        rawChartData = result.data;
 
         const sortedMonthKeys = Object.keys(rawChartData).sort((a, b) => new Date(a) - new Date(b));
         const newestMonth = sortedMonthKeys[sortedMonthKeys.length - 1];
@@ -97,23 +134,47 @@ function renderPieChart(monthKey) {
 
     const sortedCategoryEntries = Object.entries(data)
         .map(([category, amount]) => [category, Number(amount) || 0])
+        .filter(([, amount]) => amount > 0)
         .sort((a, b) => b[1] - a[1]);
 
-    const pieLabels = sortedCategoryEntries.map(([category, amount]) => `${category} (£${amount.toFixed(2)})`);
+    const totalSpending = sortedCategoryEntries.reduce((sum, [, amount]) => sum + amount, 0);
+    renderPieLegend(sortedCategoryEntries, totalSpending);
+
+    const pieLabels = sortedCategoryEntries.map(([category]) => category);
     const pieValues = sortedCategoryEntries.map(([, amount]) => amount);
 
     pieChartInst = new Chart(ctx, {
-        type: 'pie',
+        type: 'doughnut',
         data: {
             labels: pieLabels,
             datasets: [{
                 data: pieValues,
-                backgroundColor: chartColors
+                backgroundColor: sortedCategoryEntries.map((_, index) => getChartColor(index)),
+                borderColor: '#ffffff',
+                borderWidth: 2,
+                hoverOffset: 8
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '58%',
             plugins: {
-                title: { display: true, text: `Spending breakdown for ${formatMonthLabel(monthKey)}` }
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: `Spending breakdown for ${formatMonthLabel(monthKey)}`,
+                    padding: { bottom: 14 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const value = Number(context.parsed) || 0;
+                            const percentage = totalSpending > 0 ? ((value / totalSpending) * 100).toFixed(1) : "0.0";
+                            return `${context.label}: ${formatCurrency(value)} (${percentage}%)`;
+                        }
+                    }
+                }
             }
         }
     });
@@ -153,7 +214,7 @@ function renderTrendChart(months, filterCategory) {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        callback: function (value) { return '£' + value; } //
+                        callback: function (value) { return '£' + value; }
                     }
                 }
             }

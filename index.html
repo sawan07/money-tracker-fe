@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Money Tracker</title>
-    <link rel="stylesheet" href="assets/style.css?v=4">
+    <link rel="stylesheet" href="assets/style.css?v=5">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
@@ -72,7 +72,7 @@
     <form id="expenseForm">
         <label>Date: <input type="date" name="date" required></label>
         <label>Category:
-            <select name="category" required>
+            <select id="expenseCategorySelect" name="category" required>
                 <option>Nayara</option>
                 <option>Driving</option>
                 <option>Investment</option>
@@ -93,6 +93,26 @@
                 <option>other</option>
             </select>
         </label>
+        <div id="expenseCategorySummary" class="category-summary" aria-live="polite">
+            <div class="category-summary-header">
+                <span id="categorySummaryName">Select a category</span>
+                <span id="categorySummaryCount"></span>
+            </div>
+            <div class="category-summary-grid">
+                <div class="category-stat">
+                    <span class="category-stat-label">Pot Max</span>
+                    <span id="categoryPotMax" class="category-stat-value">£0.00</span>
+                </div>
+                <div class="category-stat">
+                    <span class="category-stat-label">Spent</span>
+                    <span id="categorySpent" class="category-stat-value">£0.00</span>
+                </div>
+                <div class="category-stat">
+                    <span class="category-stat-label">Left</span>
+                    <span id="categoryLeft" class="category-stat-value">£0.00</span>
+                </div>
+            </div>
+        </div>
         <label>Amount: <input type="number" step="0.01" name="amount" required></label>
         <label>Notes: <textarea name="notes"></textarea></label>
         <button type="submit">Add Expense</button>
@@ -122,8 +142,8 @@
     </form>
 
     <!-- Scripts -->
-    <script src="js/app.js?v=3"></script>
-    <script src="js/expense.js?v=2"></script>
+    <script src="js/app.js?v=4"></script>
+    <script src="js/expense.js?v=3"></script>
     <script src="js/earning.js?v=2"></script>
     <script src="js/biometric.js?v=2"></script>
     <script src="js/nav.js?v=2"></script>

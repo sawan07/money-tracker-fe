@@ -6,6 +6,8 @@ const monthNames = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
 ];
+let expenseCategorySummaries = [];
+let fallbackExpenseCategories = [];
 
 function generateMonths() {
     const now = new Date();
@@ -92,6 +94,131 @@ function formatMoney(numeric) {
     return `£${numeric.toFixed(2)}`;
 }
 
+function normalizeCategoryName(value) {
+    return value ? value.toString().trim().toLowerCase() : "";
+}
+
+function getExpenseCategorySelect() {
+    return document.getElementById("expenseCategorySelect");
+}
+
+function captureFallbackExpenseCategories() {
+    const categorySelect = getExpenseCategorySelect();
+    if (!categorySelect || fallbackExpenseCategories.length) return;
+
+    fallbackExpenseCategories = Array.from(categorySelect.options)
+        .map(option => option.value)
+        .filter(Boolean);
+}
+
+function setCategorySummaryText(message) {
+    const nameEl = document.getElementById("categorySummaryName");
+    const countEl = document.getElementById("categorySummaryCount");
+    const potMaxEl = document.getElementById("categoryPotMax");
+    const spentEl = document.getElementById("categorySpent");
+    const leftEl = document.getElementById("categoryLeft");
+
+    if (nameEl) nameEl.textContent = message;
+    if (countEl) countEl.textContent = "";
+    [potMaxEl, spentEl, leftEl].forEach(el => {
+        if (!el) return;
+        el.textContent = "£0.00";
+        el.classList.remove("green", "red");
+    });
+}
+
+function updateExpenseCategorySummary(categoryName) {
+    const selectedKey = normalizeCategoryName(categoryName);
+    const summary = expenseCategorySummaries.find(item => normalizeCategoryName(item.name) === selectedKey);
+
+    if (!summary) {
+        setCategorySummaryText(categoryName ? "Pot details unavailable" : "Select a category");
+        return;
+    }
+
+    const nameEl = document.getElementById("categorySummaryName");
+    const countEl = document.getElementById("categorySummaryCount");
+    const potMaxEl = document.getElementById("categoryPotMax");
+    const spentEl = document.getElementById("categorySpent");
+    const leftEl = document.getElementById("categoryLeft");
+
+    const potMax = parseMoneyValue(summary.potMax);
+    const spent = parseMoneyValue(summary.spent);
+    const left = parseMoneyValue(summary.left);
+    const recentCount = Number(summary.recentCount || 0);
+
+    if (nameEl) nameEl.textContent = summary.name;
+    if (countEl) {
+        countEl.textContent = recentCount
+            ? `${recentCount} of last 100 spending transactions`
+            : "Not used in last 100";
+    }
+    if (potMaxEl) potMaxEl.textContent = formatMoney(potMax);
+    if (spentEl) spentEl.textContent = formatMoney(spent);
+    if (leftEl) {
+        leftEl.textContent = formatMoney(left);
+        leftEl.classList.remove("green", "red");
+        leftEl.classList.add(left < 0 ? "red" : "green");
+    }
+}
+
+function renderExpenseCategoryOptions(categories, preferredCategory) {
+    const categorySelect = getExpenseCategorySelect();
+    if (!categorySelect) return;
+
+    const selectedKey = normalizeCategoryName(preferredCategory || categorySelect.value);
+    const optionItems = categories.length
+        ? categories.map(item => ({ name: item.name }))
+        : fallbackExpenseCategories
+            .slice()
+            .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+            .map(name => ({ name }));
+
+    if (!optionItems.length) {
+        setCategorySummaryText("No categories found");
+        return;
+    }
+
+    categorySelect.innerHTML = "";
+    optionItems.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item.name;
+        option.textContent = item.name;
+        categorySelect.appendChild(option);
+    });
+
+    const matchingOption = Array.from(categorySelect.options)
+        .find(option => normalizeCategoryName(option.value) === selectedKey);
+
+    categorySelect.value = matchingOption ? matchingOption.value : categorySelect.options[0].value;
+    updateExpenseCategorySummary(categorySelect.value);
+}
+
+async function refreshExpenseCategories(month, preferredCategory) {
+    const categorySelect = getExpenseCategorySelect();
+    if (!categorySelect || !month) return;
+
+    captureFallbackExpenseCategories();
+    setCategorySummaryText("Loading category details...");
+
+    try {
+        const res = await fetch(`${API_URL}?action=getExpenseCategories&month=${encodeURIComponent(month)}`);
+        const data = await res.json();
+
+        if (data.status !== "ok" || !Array.isArray(data.categories)) {
+            throw new Error(data.message || "Invalid category response");
+        }
+
+        expenseCategorySummaries = data.categories;
+        renderExpenseCategoryOptions(expenseCategorySummaries, preferredCategory);
+    } catch (err) {
+        console.error("Fetch expense categories failed:", err);
+        expenseCategorySummaries = [];
+        renderExpenseCategoryOptions([], preferredCategory);
+        setCategorySummaryText("Could not load category details");
+    }
+}
+
 function applyLeftStatColor(el, numeric, mode) {
     el.classList.remove("green", "red");
     if (mode === "threshold100") {
@@ -150,21 +277,38 @@ async function fetchBalance(month) {
 // --- Run after DOM is ready ---
 document.addEventListener("DOMContentLoaded", () => {
     const monthSelect = document.getElementById("monthSelect"); // cite: 4
+    const expenseCategorySelect = getExpenseCategorySelect();
+
+    captureFallbackExpenseCategories();
 
     if (monthSelect) {
         const currentMonth = monthSelect.value;
         fetchBalance(currentMonth); // cite: 4
+        refreshExpenseCategories(currentMonth);
 
         monthSelect.addEventListener("change", (e) => {
             fetchBalance(e.target.value); // cite: 4
+            refreshExpenseCategories(e.target.value);
         });
+    }
+
+    if (expenseCategorySelect) {
+        expenseCategorySelect.addEventListener("change", (e) => {
+            updateExpenseCategorySummary(e.target.value);
+        });
+        if (!monthSelect) {
+            updateExpenseCategorySummary(expenseCategorySelect.value);
+        }
     }
 
     const refreshBtn = document.getElementById("refreshBalanceBtn"); // cite: 4
     if (refreshBtn) {
         refreshBtn.addEventListener("click", () => {
             const month = monthSelect ? monthSelect.value : "";
-            if (month) fetchBalance(month); // cite: 4
+            if (month) {
+                fetchBalance(month); // cite: 4
+                refreshExpenseCategories(month);
+            }
         });
     }
 });
