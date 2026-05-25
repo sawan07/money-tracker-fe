@@ -3,18 +3,16 @@ let pieChartInst = null;
 let trendChartInst = null;
 
 const chartColors = [
-    '#4caf50', '#2196f3', '#ff9800', '#f44336', '#9c27b0',
-    '#795548', '#00bcd4', '#607d8b', '#e91e63', '#3f51b5',
-    '#009688', '#8bc34a', '#ffc107', '#ff5722', '#673ab7'
+    '#36d4ff', '#7c5cff', '#39e7a5', '#f8c14a', '#ff5c7a',
+    '#14b8a6', '#60a5fa', '#c084fc', '#f97316', '#22c55e',
+    '#e879f9', '#a3e635', '#facc15', '#fb7185', '#38bdf8'
 ];
+const chartTextColor = '#d9e7ff';
+const chartMutedColor = '#8fa2c2';
+const chartGridColor = 'rgba(143, 162, 194, 0.16)';
 
 function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
+    return getChartColor(Math.floor(Math.random() * chartColors.length));
 }
 
 function formatMonthLabel(dateStr) {
@@ -150,7 +148,7 @@ function renderPieChart(monthKey) {
             datasets: [{
                 data: pieValues,
                 backgroundColor: sortedCategoryEntries.map((_, index) => getChartColor(index)),
-                borderColor: '#ffffff',
+                borderColor: '#07111f',
                 borderWidth: 2,
                 hoverOffset: 8
             }]
@@ -164,9 +162,16 @@ function renderPieChart(monthKey) {
                 title: {
                     display: true,
                     text: `Spending breakdown for ${formatMonthLabel(monthKey)}`,
+                    color: chartTextColor,
+                    font: { weight: '700' },
                     padding: { bottom: 14 }
                 },
                 tooltip: {
+                    backgroundColor: 'rgba(7, 17, 31, 0.94)',
+                    borderColor: 'rgba(54, 212, 255, 0.28)',
+                    borderWidth: 1,
+                    titleColor: chartTextColor,
+                    bodyColor: chartMutedColor,
                     callbacks: {
                         label: function (context) {
                             const value = Number(context.parsed) || 0;
@@ -210,11 +215,33 @@ function renderTrendChart(months, filterCategory) {
             }]
         },
         options: {
+            plugins: {
+                legend: {
+                    labels: {
+                        color: chartTextColor
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(7, 17, 31, 0.94)',
+                    borderColor: 'rgba(54, 212, 255, 0.28)',
+                    borderWidth: 1,
+                    titleColor: chartTextColor,
+                    bodyColor: chartMutedColor
+                }
+            },
             scales: {
+                x: {
+                    ticks: { color: chartMutedColor },
+                    grid: { color: chartGridColor }
+                },
                 y: {
                     beginAtZero: true,
                     ticks: {
+                        color: chartMutedColor,
                         callback: function (value) { return '£' + value; }
+                    },
+                    grid: {
+                        color: chartGridColor
                     }
                 }
             }
