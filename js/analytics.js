@@ -60,6 +60,17 @@ function renderPieLegend(entries, total) {
     }).join("");
 }
 
+function renderPieTotal(monthKey, total) {
+    const totalEl = document.getElementById("pieTotal");
+    if (!totalEl) return;
+
+    totalEl.innerHTML = `
+        <span class="pie-total-label">Total Spent</span>
+        <span class="pie-total-value">${formatCurrency(total)}</span>
+        <span class="pie-total-month">${formatMonthLabel(monthKey)}</span>
+    `;
+}
+
 async function initAnalytics() {
     try {
         const res = await fetch(`${API_URL}?action=getChartData`);
@@ -136,6 +147,7 @@ function renderPieChart(monthKey) {
         .sort((a, b) => b[1] - a[1]);
 
     const totalSpending = sortedCategoryEntries.reduce((sum, [, amount]) => sum + amount, 0);
+    renderPieTotal(monthKey, totalSpending);
     renderPieLegend(sortedCategoryEntries, totalSpending);
 
     const pieLabels = sortedCategoryEntries.map(([category]) => category);

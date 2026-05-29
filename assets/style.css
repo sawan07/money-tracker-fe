@@ -472,6 +472,42 @@ button:hover {
     height: 100% !important;
 }
 
+.pie-total-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    gap: 3px;
+    width: min(46%, 150px);
+    min-height: 88px;
+    place-content: center;
+    padding: 12px;
+    border: 1px solid rgba(54, 212, 255, 0.16);
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(7, 17, 31, 0.86), rgba(7, 17, 31, 0.58));
+    box-shadow: inset 0 0 22px rgba(54, 212, 255, 0.06);
+    pointer-events: none;
+    text-align: center;
+    transform: translate(-50%, -44%);
+}
+
+.pie-total-label,
+.pie-total-month {
+    color: var(--muted);
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    line-height: 1.15;
+    text-transform: uppercase;
+}
+
+.pie-total-value {
+    color: var(--heading);
+    font-size: clamp(1.05rem, 3vw, 1.45rem);
+    font-weight: 950;
+    letter-spacing: -0.04em;
+}
+
 .chart-legend,
 .transactions-list,
 .tx-group {

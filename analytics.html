@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self' https://script.google.com https://script.googleusercontent.com https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline';">
 
-    <link rel="stylesheet" href="assets/style.css?v=6">
+    <link rel="stylesheet" href="assets/style.css?v=7">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 </head>
@@ -47,6 +47,10 @@
         <div class="pie-chart-layout">
             <div class="pie-canvas-wrap">
                 <canvas id="categoryPieChart"></canvas>
+                <div id="pieTotal" class="pie-total-overlay" aria-live="polite">
+                    <span class="pie-total-label">Total Spent</span>
+                    <span class="pie-total-value">£0.00</span>
+                </div>
             </div>
             <div id="pieLegend" class="chart-legend" aria-label="Category spending legend"></div>
         </div>
@@ -64,7 +68,7 @@
     <script src="js/nav.js?v=2"></script>
     <script src="js/app.js?v=2"></script>
     <script src="js/biometric.js?v=2"></script>
-    <script src="js/analytics.js?v=3"></script>
+    <script src="js/analytics.js?v=4"></script>
 </body>
 
 </html>
