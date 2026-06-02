@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self' https://script.google.com https://script.googleusercontent.com https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline';">
 
-    <link rel="stylesheet" href="assets/style.css?v=7">
+    <link rel="stylesheet" href="assets/style.css?v=8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 </head>
@@ -54,6 +54,13 @@
             </div>
             <div id="pieLegend" class="chart-legend" aria-label="Category spending legend"></div>
         </div>
+        <div class="pot-progress-panel">
+            <div class="pot-progress-header">
+                <span>Pot usage</span>
+                <span id="potProgressMonth">Selected month</span>
+            </div>
+            <div id="potProgressList" class="pot-progress-list" aria-live="polite"></div>
+        </div>
     </div>
 
     <div class="chart-card">
@@ -66,9 +73,9 @@
     </div>
 
     <script src="js/nav.js?v=2"></script>
-    <script src="js/app.js?v=2"></script>
+    <script src="js/app.js?v=5"></script>
     <script src="js/biometric.js?v=2"></script>
-    <script src="js/analytics.js?v=4"></script>
+    <script src="js/analytics.js?v=5"></script>
 </body>
 
 </html>

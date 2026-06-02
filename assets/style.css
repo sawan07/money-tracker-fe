@@ -557,6 +557,133 @@ button:hover {
     font-size: 0.82rem;
 }
 
+.pot-progress-panel {
+    margin-top: 20px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.pot-progress-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    color: var(--heading);
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+#potProgressMonth {
+    color: var(--muted);
+    font-size: 0.7rem;
+}
+
+.pot-progress-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 10px;
+}
+
+.pot-progress-item {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: rgba(4, 12, 23, 0.42);
+}
+
+.pot-progress-top,
+.pot-progress-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.pot-progress-top {
+    margin-bottom: 10px;
+}
+
+.pot-progress-dot {
+    flex: 0 0 auto;
+    width: 11px;
+    height: 11px;
+    border-radius: 999px;
+    background: var(--success);
+    box-shadow: 0 0 16px rgba(57, 231, 165, 0.72);
+}
+
+.pot-progress-item.warning .pot-progress-dot {
+    background: var(--warning);
+    box-shadow: 0 0 16px rgba(248, 193, 74, 0.72);
+}
+
+.pot-progress-item.over .pot-progress-dot {
+    background: var(--danger);
+    box-shadow: 0 0 16px rgba(255, 92, 122, 0.72);
+}
+
+.pot-progress-item.no-pot .pot-progress-dot {
+    background: var(--muted);
+    box-shadow: none;
+}
+
+.pot-progress-name {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    color: var(--heading);
+    font-weight: 900;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pot-progress-percent {
+    color: var(--subtle);
+    font-size: 0.78rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.pot-progress-track {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(143, 162, 194, 0.16);
+}
+
+.pot-progress-fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--success), var(--primary));
+    box-shadow: 0 0 18px rgba(54, 212, 255, 0.24);
+}
+
+.pot-progress-item.warning .pot-progress-fill {
+    background: linear-gradient(90deg, var(--warning), #f97316);
+}
+
+.pot-progress-item.over .pot-progress-fill {
+    background: linear-gradient(90deg, var(--danger), #fb7185);
+}
+
+.pot-progress-item.no-pot .pot-progress-fill {
+    background: var(--muted);
+    opacity: 0.35;
+}
+
+.pot-progress-meta {
+    margin-top: 9px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
 .transactions-header {
     margin-bottom: 14px;
 }
