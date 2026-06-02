@@ -38,6 +38,10 @@ function escapeHtml(value) {
     }[char]));
 }
 
+function normalizeCategoryName(value) {
+    return value ? value.toString().trim().toLowerCase() : "";
+}
+
 function renderPieLegend(entries, total) {
     const legendEl = document.getElementById("pieLegend");
     if (!legendEl) return;
@@ -69,6 +73,84 @@ function renderPieTotal(monthKey, total) {
         <span class="pie-total-value">${formatCurrency(total)}</span>
         <span class="pie-total-month">${formatMonthLabel(monthKey)}</span>
     `;
+}
+
+function getPotStatusClass(percent, potMax) {
+    if (potMax <= 0) return "no-pot";
+    if (percent >= 100) return "over";
+    if (percent >= 80) return "warning";
+    return "good";
+}
+
+function renderPotProgressSkeleton(monthKey) {
+    const monthEl = document.getElementById("potProgressMonth");
+    const listEl = document.getElementById("potProgressList");
+    if (monthEl) monthEl.textContent = formatMonthLabel(monthKey);
+    if (listEl) listEl.innerHTML = '<div class="empty-state">Loading pot usage...</div>';
+}
+
+function renderPotProgress(monthKey, chartEntries, categoryDetails) {
+    const monthEl = document.getElementById("potProgressMonth");
+    const listEl = document.getElementById("potProgressList");
+    if (!listEl) return;
+
+    if (monthEl) monthEl.textContent = formatMonthLabel(monthKey);
+
+    const detailsByCategory = (categoryDetails || []).reduce((acc, item) => {
+        acc[normalizeCategoryName(item.name)] = item;
+        return acc;
+    }, {});
+
+    const rows = chartEntries.map(([category, chartAmount]) => {
+        const detail = detailsByCategory[normalizeCategoryName(category)] || {};
+        const spent = Number(detail.spent ?? chartAmount) || 0;
+        const potMax = Number(detail.potMax || 0);
+        const left = Number(detail.left ?? (potMax - spent)) || 0;
+        const percent = potMax > 0 ? (spent / potMax) * 100 : 0;
+        const clampedPercent = Math.max(0, Math.min(percent, 100));
+        const statusClass = getPotStatusClass(percent, potMax);
+        const statusText = potMax > 0 ? `${percent.toFixed(0)}% used` : "No pot set";
+
+        return `
+            <div class="pot-progress-item ${statusClass}">
+                <div class="pot-progress-top">
+                    <span class="pot-progress-dot"></span>
+                    <span class="pot-progress-name">${escapeHtml(category)}</span>
+                    <span class="pot-progress-percent">${statusText}</span>
+                </div>
+                <div class="pot-progress-track" aria-hidden="true">
+                    <span class="pot-progress-fill" style="width:${clampedPercent}%"></span>
+                </div>
+                <div class="pot-progress-meta">
+                    <span>${formatCurrency(spent)} spent</span>
+                    <span>${potMax > 0 ? `${formatCurrency(left)} left of ${formatCurrency(potMax)}` : "Set a pot to track usage"}</span>
+                </div>
+            </div>
+        `;
+    });
+
+    listEl.innerHTML = rows.length
+        ? rows.join("")
+        : '<div class="empty-state">No spending categories for this month.</div>';
+}
+
+async function loadPotProgress(monthKey, chartEntries) {
+    renderPotProgressSkeleton(monthKey);
+
+    try {
+        const categoryUrl = `${API_URL}?action=getExpenseCategories&month=${encodeURIComponent(monthKey)}&_=${Date.now()}`;
+        const res = await fetch(categoryUrl, { cache: "no-store" });
+        const data = await res.json();
+
+        if (data.status !== "ok" || !Array.isArray(data.categories)) {
+            throw new Error(data.message || "Invalid category response");
+        }
+
+        renderPotProgress(monthKey, chartEntries, data.categories);
+    } catch (err) {
+        console.error("Failed to load pot progress:", err);
+        renderPotProgress(monthKey, chartEntries, []);
+    }
 }
 
 async function initAnalytics() {
@@ -149,6 +231,7 @@ function renderPieChart(monthKey) {
     const totalSpending = sortedCategoryEntries.reduce((sum, [, amount]) => sum + amount, 0);
     renderPieTotal(monthKey, totalSpending);
     renderPieLegend(sortedCategoryEntries, totalSpending);
+    loadPotProgress(monthKey, sortedCategoryEntries);
 
     const pieLabels = sortedCategoryEntries.map(([category]) => category);
     const pieValues = sortedCategoryEntries.map(([, amount]) => amount);
