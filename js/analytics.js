@@ -138,7 +138,8 @@ async function loadPotProgress(monthKey, chartEntries) {
     renderPotProgressSkeleton(monthKey);
 
     try {
-        const categoryUrl = `${API_URL}?action=getExpenseCategories&month=${encodeURIComponent(monthKey)}&_=${Date.now()}`;
+        const sheetMonth = formatMonthLabel(monthKey);
+        const categoryUrl = `${API_URL}?action=getExpenseCategories&month=${encodeURIComponent(sheetMonth)}&_=${Date.now()}`;
         const res = await fetch(categoryUrl, { cache: "no-store" });
         const data = await res.json();
 
