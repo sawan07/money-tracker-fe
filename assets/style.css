@@ -378,7 +378,6 @@ button:hover {
 
 .left-stat,
 .category-stat,
-.legend-item,
 .tx-item,
 .tx-group-header,
 .empty-state {
@@ -455,16 +454,15 @@ button:hover {
 }
 
 .pie-chart-layout {
-    display: grid;
-    grid-template-columns: minmax(240px, 0.9fr) minmax(260px, 1.1fr);
-    gap: 20px;
-    align-items: center;
+    display: block;
     margin-top: 10px;
 }
 
 .pie-canvas-wrap {
     position: relative;
     height: 300px;
+    max-width: 520px;
+    margin: 0 auto;
 }
 
 .pie-canvas-wrap canvas {
@@ -508,53 +506,10 @@ button:hover {
     letter-spacing: -0.04em;
 }
 
-.chart-legend,
 .transactions-list,
 .tx-group {
     display: grid;
     gap: 10px;
-}
-
-.chart-legend {
-    max-height: 380px;
-    overflow-y: auto;
-    padding-right: 4px;
-}
-
-.legend-item {
-    display: grid;
-    grid-template-columns: 14px minmax(0, 1fr) auto auto;
-    gap: 9px;
-    align-items: center;
-    padding: 10px 12px;
-    color: var(--subtle);
-    font-size: 0.9rem;
-}
-
-.legend-color {
-    width: 12px;
-    height: 12px;
-    border-radius: 999px;
-    box-shadow: 0 0 16px currentColor;
-}
-
-.legend-name {
-    min-width: 0;
-    overflow: hidden;
-    color: var(--heading);
-    font-weight: 800;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.legend-value {
-    color: var(--heading);
-    font-weight: 900;
-}
-
-.legend-percent {
-    color: var(--muted);
-    font-size: 0.82rem;
 }
 
 .pot-progress-panel {
@@ -843,17 +798,4 @@ button:hover {
         height: 300px;
     }
 
-    .chart-legend {
-        max-height: none;
-        overflow-y: visible;
-        padding-right: 0;
-    }
-
-    .legend-item {
-        grid-template-columns: 14px minmax(0, 1fr) auto;
-    }
-
-    .legend-percent {
-        display: none;
-    }
 }

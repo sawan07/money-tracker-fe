@@ -42,28 +42,6 @@ function normalizeCategoryName(value) {
     return value ? value.toString().trim().toLowerCase() : "";
 }
 
-function renderPieLegend(entries, total) {
-    const legendEl = document.getElementById("pieLegend");
-    if (!legendEl) return;
-
-    if (!entries.length) {
-        legendEl.innerHTML = '<div class="empty-state">No spending categories for this month.</div>';
-        return;
-    }
-
-    legendEl.innerHTML = entries.map(([category, amount], index) => {
-        const percentage = total > 0 ? ((amount / total) * 100).toFixed(1) : "0.0";
-        return `
-            <div class="legend-item">
-                <span class="legend-color" style="background:${getChartColor(index)}"></span>
-                <span class="legend-name">${escapeHtml(category)}</span>
-                <span class="legend-value">${formatCurrency(amount)}</span>
-                <span class="legend-percent">${percentage}%</span>
-            </div>
-        `;
-    }).join("");
-}
-
 function renderPieTotal(monthKey, total) {
     const totalEl = document.getElementById("pieTotal");
     if (!totalEl) return;
@@ -231,7 +209,6 @@ function renderPieChart(monthKey) {
 
     const totalSpending = sortedCategoryEntries.reduce((sum, [, amount]) => sum + amount, 0);
     renderPieTotal(monthKey, totalSpending);
-    renderPieLegend(sortedCategoryEntries, totalSpending);
     loadPotProgress(monthKey, sortedCategoryEntries);
 
     const pieLabels = sortedCategoryEntries.map(([category]) => category);
