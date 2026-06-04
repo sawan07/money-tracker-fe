@@ -216,6 +216,7 @@ h2 {
 form,
 .chart-card,
 .transactions-card,
+.home-transactions-card,
 #balanceContainer {
     position: relative;
     margin-bottom: 24px;
@@ -233,6 +234,7 @@ form,
 form::before,
 .chart-card::before,
 .transactions-card::before,
+.home-transactions-card::before,
 #balanceContainer::before {
     content: "";
     position: absolute;
@@ -245,12 +247,14 @@ form::before,
 form > *,
 .chart-card > *,
 .transactions-card > *,
+.home-transactions-card > *,
 #balanceContainer > * {
     position: relative;
 }
 
 .chart-card h3,
-.transactions-card h3 {
+.transactions-card h3,
+.home-transactions-card h3 {
     margin: 0 0 18px;
     color: var(--heading);
     font-size: 1rem;
@@ -335,6 +339,7 @@ button:hover {
 
 .left-summary-header,
 .transactions-header,
+.home-transactions-header,
 .category-summary-header,
 .tx-group-header,
 .tx-top,
@@ -347,6 +352,37 @@ button:hover {
 
 .left-summary-header {
     margin-bottom: 16px;
+}
+
+.home-transactions-header {
+    margin-bottom: 14px;
+}
+
+.home-transactions-header h3 {
+    margin: 4px 0 0;
+}
+
+.view-all-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.045);
+    color: var(--heading);
+    font-size: 0.82rem;
+    font-weight: 900;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.view-all-link:hover,
+.view-all-link:focus-visible {
+    border-color: var(--border-strong);
+    background: rgba(54, 212, 255, 0.08);
+    color: var(--primary);
 }
 
 .left-summary-title {
@@ -542,6 +578,64 @@ button:hover {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
     gap: 10px;
+}
+
+.home-transactions-list {
+    display: grid;
+    gap: 10px;
+}
+
+.home-tx-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 13px 14px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: rgba(4, 12, 23, 0.42);
+}
+
+.home-tx-main {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 5px 9px;
+    min-width: 0;
+}
+
+.home-tx-title {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--heading);
+    font-weight: 900;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.home-tx-note {
+    grid-column: 1 / -1;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.home-tx-side {
+    display: grid;
+    gap: 4px;
+    flex: 0 0 auto;
+    text-align: right;
+}
+
+.home-tx-date {
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .pot-progress-item {
@@ -781,6 +875,7 @@ button:hover {
 
     .category-summary-header,
     .transactions-header,
+    .home-transactions-header,
     .tx-group-header {
         flex-direction: column;
         align-items: flex-start;
@@ -792,6 +887,14 @@ button:hover {
 
     .transactions-header .refresh-btn {
         width: 100%;
+    }
+
+    .view-all-link {
+        width: 100%;
+    }
+
+    .home-tx-item {
+        align-items: flex-start;
     }
 
     .pie-canvas-wrap {

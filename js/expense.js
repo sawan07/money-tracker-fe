@@ -13,6 +13,9 @@ document.getElementById("expenseForm").addEventListener("submit", async (e) => {
     msg.className = "message success";
     e.target.reset();
     fetchBalance(month);
+    if (typeof loadHomeTransactions === "function") {
+        loadHomeTransactions();
+    }
     if (typeof refreshExpenseCategories === "function") {
         refreshExpenseCategories(month, selectedCategory);
     }

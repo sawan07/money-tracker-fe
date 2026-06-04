@@ -95,6 +95,88 @@ function formatMoney(numeric) {
     return `£${numeric.toFixed(2)}`;
 }
 
+function escapeHtml(value) {
+    return value.toString().replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[char]));
+}
+
+function parseTransactionDate(item) {
+    const rawValue = item.date || item.timestamp;
+    if (!rawValue) return null;
+    const parsed = new Date(rawValue);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function formatTransactionDate(item) {
+    const parsed = parseTransactionDate(item);
+    if (!parsed) return "Unknown date";
+
+    return parsed.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short"
+    });
+}
+
+function renderHomeTransactions(items) {
+    const listEl = document.getElementById("homeTransactionsList");
+    if (!listEl) return;
+
+    if (!items.length) {
+        listEl.innerHTML = '<div class="empty-state">No transactions found yet.</div>';
+        return;
+    }
+
+    listEl.innerHTML = items.slice(0, 3).map(item => {
+        const amount = Number(item.amount || 0);
+        const isExpense = item.type === "expense";
+        const amountClass = isExpense ? "amount-expense" : "amount-earning";
+        const sign = isExpense ? "-" : "+";
+        const title = escapeHtml(item.categoryOrSource || "-");
+        const note = escapeHtml(item.notes ? item.notes : "No note");
+        const type = escapeHtml(item.type || "transaction");
+
+        return `
+            <div class="home-tx-item">
+                <div class="home-tx-main">
+                    <span class="tx-type ${isExpense ? "type-expense" : "type-earning"}">${type}</span>
+                    <span class="home-tx-title">${title}</span>
+                    <span class="home-tx-note">${note}</span>
+                </div>
+                <div class="home-tx-side">
+                    <span class="home-tx-date">${formatTransactionDate(item)}</span>
+                    <span class="tx-amount ${amountClass}">${sign}${formatMoney(Math.abs(amount))}</span>
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
+async function loadHomeTransactions() {
+    const listEl = document.getElementById("homeTransactionsList");
+    if (!listEl) return;
+
+    listEl.innerHTML = '<div class="empty-state">Loading transactions...</div>';
+
+    try {
+        const res = await fetch(`${API_URL}?action=getLatestTransactions&_=${Date.now()}`, { cache: "no-store" });
+        const result = await res.json();
+
+        if (result.status !== "ok") {
+            throw new Error(result.message || "Could not load transactions");
+        }
+
+        renderHomeTransactions(Array.isArray(result.data) ? result.data : []);
+    } catch (err) {
+        console.error("Failed to load home transactions:", err);
+        listEl.innerHTML = '<div class="empty-state">Could not load latest transactions.</div>';
+    }
+}
+
 function normalizeCategoryName(value) {
     return value ? value.toString().trim().toLowerCase() : "";
 }
@@ -288,6 +370,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const expenseCategorySelect = getExpenseCategorySelect();
 
     captureFallbackExpenseCategories();
+    loadHomeTransactions();
 
     if (monthSelect) {
         const currentMonth = monthSelect.value;
