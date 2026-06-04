@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Money Tracker</title>
-    <link rel="stylesheet" href="assets/style.css?v=6">
+    <link rel="stylesheet" href="assets/style.css?v=10">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
@@ -39,6 +39,19 @@
 
     <h1>Money Tracker</h1>
     <p class="subtitle">Track expenses, earnings, and stay on top of your monthly cash flow.</p>
+
+    <div class="home-transactions-card">
+        <div class="home-transactions-header">
+            <div>
+                <span class="left-summary-title">Latest activity</span>
+                <h3>Last 3 transactions</h3>
+            </div>
+            <a class="view-all-link" href="transactions.html">View all</a>
+        </div>
+        <div id="homeTransactionsList" class="home-transactions-list" aria-live="polite">
+            <div class="empty-state">Loading transactions...</div>
+        </div>
+    </div>
 
     <div id="balanceContainer">
         <div class="left-summary-header">
@@ -142,9 +155,9 @@
     </form>
 
     <!-- Scripts -->
-    <script src="js/app.js?v=5"></script>
-    <script src="js/expense.js?v=3"></script>
-    <script src="js/earning.js?v=2"></script>
+    <script src="js/app.js?v=6"></script>
+    <script src="js/expense.js?v=4"></script>
+    <script src="js/earning.js?v=3"></script>
     <script src="js/biometric.js?v=2"></script>
     <script src="js/nav.js?v=2"></script>
 </body>

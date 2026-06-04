@@ -12,4 +12,7 @@ document.getElementById("earningForm").addEventListener("submit", async (e) => {
     msg.className = "message success";
     e.target.reset();
     fetchBalance(month);
+    if (typeof loadHomeTransactions === "function") {
+        loadHomeTransactions();
+    }
 });
