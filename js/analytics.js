@@ -89,7 +89,9 @@ function renderPotProgress(monthKey, chartEntries, categoryDetails) {
         const statusClass = getPotStatusClass(percent, potMax);
         const statusText = potMax > 0 ? `${percent.toFixed(0)}% used` : "No pot set";
 
-        return `
+        return {
+            category,
+            html: `
             <div class="pot-progress-item ${statusClass}">
                 <div class="pot-progress-top">
                     <span class="pot-progress-dot"></span>
@@ -104,11 +106,19 @@ function renderPotProgress(monthKey, chartEntries, categoryDetails) {
                     <span>${potMax > 0 ? `${formatCurrency(left)} left of ${formatCurrency(potMax)}` : "Set a pot to track usage"}</span>
                 </div>
             </div>
-        `;
+        `,
+            hasPot: potMax > 0,
+            percent
+        };
+    }).sort((a, b) => {
+        if (a.hasPot !== b.hasPot) return a.hasPot ? -1 : 1;
+        if (!a.hasPot && !b.hasPot) return a.category.localeCompare(b.category);
+        if (a.percent !== b.percent) return a.percent - b.percent;
+        return a.category.localeCompare(b.category);
     });
 
     listEl.innerHTML = rows.length
-        ? rows.join("")
+        ? rows.map(row => row.html).join("")
         : '<div class="empty-state">No spending categories for this month.</div>';
 }
 
