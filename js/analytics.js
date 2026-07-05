@@ -339,7 +339,7 @@ function setupDailySpendingControls() {
 
 async function initAnalytics() {
     try {
-        const res = await fetch(`${API_URL}?action=getChartData`);
+        const res = await fetch(`${API_URL}?action=getChartData&_=${Date.now()}`, { cache: "no-store" });
         const result = await res.json();
         if (result.status !== "ok") return;
 

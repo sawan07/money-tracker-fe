@@ -331,8 +331,8 @@ function doGet(e) {
       
       var summary = {};
       rows.forEach(row => {
-        var rType = row[2], rMonth = row[1], rCat = row[4], rAmt = parseFloat(row[5]) || 0;
-        if (rType === "expense") {
+        var rType = row[2], rMonth = row[1], rCat = normalizeKey(row[4]), rAmt = parseFloat(row[5]) || 0;
+        if (rType === "expense" && rCat) {
           if (!summary[rMonth]) summary[rMonth] = {};
           summary[rMonth][rCat] = (summary[rMonth][rCat] || 0) + rAmt;
         }
