@@ -1,6 +1,8 @@
 let rawChartData = {};
 let pieChartInst = null;
 let trendChartInst = null;
+let dailySpendChartInst = null;
+let dailyControlsInitialized = false;
 
 const chartColors = [
     '#36d4ff', '#7c5cff', '#39e7a5', '#f8c14a', '#ff5c7a',
@@ -13,6 +15,26 @@ const chartGridColor = 'rgba(143, 162, 194, 0.16)';
 
 function getRandomColor() {
     return getChartColor(Math.floor(Math.random() * chartColors.length));
+}
+
+function toDateInputValue(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function parseDateInputValue(value) {
+    if (!value) return null;
+    const [year, month, day] = value.split('-').map(Number);
+    if (!year || !month || !day) return null;
+    return new Date(year, month - 1, day);
+}
+
+function formatShortRangeDate(value) {
+    const date = parseDateInputValue(value);
+    if (!date) return value;
+    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 function formatMonthLabel(dateStr) {
@@ -142,6 +164,179 @@ async function loadPotProgress(monthKey, chartEntries) {
     }
 }
 
+function getWeekRange(referenceDate) {
+    const start = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate());
+    const day = start.getDay();
+    const mondayOffset = day === 0 ? -6 : 1 - day;
+    start.setDate(start.getDate() + mondayOffset);
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+
+    return {
+        from: toDateInputValue(start),
+        to: toDateInputValue(end),
+        label: "This week"
+    };
+}
+
+function getMonthRange(referenceDate) {
+    const start = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), 1);
+    const end = new Date(referenceDate.getFullYear(), referenceDate.getMonth() + 1, 0);
+
+    return {
+        from: toDateInputValue(start),
+        to: toDateInputValue(end),
+        label: "This month"
+    };
+}
+
+function setDailyRangeInputs(range) {
+    const fromInput = document.getElementById("dailyFromDate");
+    const toInput = document.getElementById("dailyToDate");
+    if (fromInput) fromInput.value = range.from;
+    if (toInput) toInput.value = range.to;
+}
+
+function setActiveDailyRange(rangeName) {
+    document.querySelectorAll(".range-pill").forEach(button => {
+        button.classList.toggle("active", button.dataset.range === rangeName);
+    });
+}
+
+function renderDailySpendingChart(days) {
+    const ctx = document.getElementById('dailySpendBarChart');
+    if (!ctx) return;
+
+    if (dailySpendChartInst) dailySpendChartInst.destroy();
+
+    dailySpendChartInst = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: days.map(day => day.label),
+            datasets: [{
+                label: "Daily spending (£)",
+                data: days.map(day => Number(day.amount || 0)),
+                backgroundColor: 'rgba(54, 212, 255, 0.72)',
+                borderColor: '#36d4ff',
+                borderWidth: 1,
+                borderRadius: 8,
+                maxBarThickness: 34
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: { color: chartTextColor }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(7, 17, 31, 0.94)',
+                    borderColor: 'rgba(54, 212, 255, 0.28)',
+                    borderWidth: 1,
+                    titleColor: chartTextColor,
+                    bodyColor: chartMutedColor,
+                    callbacks: {
+                        label: function (context) {
+                            return `Spent: ${formatCurrency(Number(context.parsed.y) || 0)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: chartMutedColor,
+                        maxRotation: 45,
+                        minRotation: 0
+                    },
+                    grid: { display: false }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: chartMutedColor,
+                        callback: function (value) { return '£' + value; }
+                    },
+                    grid: { color: chartGridColor }
+                }
+            }
+        }
+    });
+}
+
+async function loadDailySpending(range) {
+    const totalEl = document.getElementById("dailyRangeTotal");
+    const labelEl = document.getElementById("dailyRangeLabel");
+
+    if (labelEl) {
+        labelEl.textContent = `${range.label}: ${formatShortRangeDate(range.from)} - ${formatShortRangeDate(range.to)}`;
+    }
+    if (totalEl) totalEl.textContent = "Loading...";
+
+    try {
+        const url = `${API_URL}?action=getDailySpending&from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}&_=${Date.now()}`;
+        const res = await fetch(url, { cache: "no-store" });
+        const result = await res.json();
+
+        if (result.status !== "ok" || !Array.isArray(result.data)) {
+            throw new Error(result.message || "Invalid daily spending response");
+        }
+
+        if (totalEl) totalEl.textContent = formatCurrency(Number(result.total || 0));
+        renderDailySpendingChart(result.data);
+    } catch (err) {
+        console.error("Failed to load daily spending:", err);
+        if (totalEl) totalEl.textContent = "Unavailable";
+        renderDailySpendingChart([]);
+    }
+}
+
+function applyDailyRangePreset(rangeName) {
+    const now = new Date();
+    const range = rangeName === "month" ? getMonthRange(now) : getWeekRange(now);
+    setActiveDailyRange(rangeName);
+    setDailyRangeInputs(range);
+    loadDailySpending(range);
+}
+
+function applyCustomDailyRange() {
+    const fromInput = document.getElementById("dailyFromDate");
+    const toInput = document.getElementById("dailyToDate");
+    if (!fromInput || !toInput || !fromInput.value || !toInput.value) return;
+
+    setActiveDailyRange("custom");
+    loadDailySpending({
+        from: fromInput.value,
+        to: toInput.value,
+        label: "Custom range"
+    });
+}
+
+function setupDailySpendingControls() {
+    if (dailyControlsInitialized) return;
+
+    const dailyChartEl = document.getElementById("dailySpendBarChart");
+    const applyBtn = document.getElementById("applyDailyRangeBtn");
+    if (!dailyChartEl || !applyBtn) return;
+
+    dailyControlsInitialized = true;
+
+    document.querySelectorAll(".range-pill").forEach(button => {
+        button.addEventListener("click", () => {
+            const rangeName = button.dataset.range;
+            if (rangeName === "custom") {
+                setActiveDailyRange("custom");
+                return;
+            }
+            applyDailyRangePreset(rangeName);
+        });
+    });
+
+    applyBtn.addEventListener("click", applyCustomDailyRange);
+    applyDailyRangePreset("week");
+}
+
 async function initAnalytics() {
     try {
         const res = await fetch(`${API_URL}?action=getChartData`);
@@ -172,6 +367,7 @@ async function initAnalytics() {
         // Initial Render
         renderPieChart(newestMonth);
         renderTrendChart(sortedMonthKeys, "Total");
+        setupDailySpendingControls();
 
         // Trend filter listener
         const trendSelect = document.getElementById("trendCategorySelect");
