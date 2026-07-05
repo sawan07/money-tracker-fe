@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self' https://script.google.com https://script.googleusercontent.com https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline';">
 
-    <link rel="stylesheet" href="assets/style.css?v=9">
+    <link rel="stylesheet" href="assets/style.css?v=10">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 </head>
@@ -71,10 +71,34 @@
         <canvas id="trendLineChart"></canvas>
     </div>
 
+    <div class="chart-card">
+        <h3>Daily Spending Breakdown</h3>
+        <p class="chart-helper">Compare daily spending for this week, this month, or any custom date range.</p>
+        <div class="daily-range-toolbar" role="group" aria-label="Daily spending range">
+            <button type="button" class="range-pill active" data-range="week">This week</button>
+            <button type="button" class="range-pill" data-range="month">This month</button>
+            <button type="button" class="range-pill" data-range="custom">Custom</button>
+        </div>
+        <div class="daily-date-grid">
+            <label>From:
+                <input id="dailyFromDate" type="date">
+            </label>
+            <label>To:
+                <input id="dailyToDate" type="date">
+            </label>
+            <button id="applyDailyRangeBtn" type="button">Apply Range</button>
+        </div>
+        <div class="daily-summary-row">
+            <span id="dailyRangeLabel">This week</span>
+            <strong id="dailyRangeTotal">£0.00</strong>
+        </div>
+        <canvas id="dailySpendBarChart"></canvas>
+    </div>
+
     <script src="js/nav.js?v=2"></script>
     <script src="js/app.js?v=5"></script>
     <script src="js/biometric.js?v=2"></script>
-    <script src="js/analytics.js?v=8"></script>
+    <script src="js/analytics.js?v=9"></script>
 </body>
 
 </html>

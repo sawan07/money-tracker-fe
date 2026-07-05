@@ -85,6 +85,55 @@ function parseAmountCell(value, displayValue) {
   return parseAmountValue(displayValue);
 }
 
+function parseDateParam(value) {
+  if (!value) return null;
+  var parts = value.toString().split("-");
+  if (parts.length !== 3) return null;
+
+  var year = parseInt(parts[0], 10);
+  var month = parseInt(parts[1], 10) - 1;
+  var day = parseInt(parts[2], 10);
+  var date = new Date(year, month, day);
+
+  if (isNaN(date.getTime())) return null;
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function parseTransactionDateValue(value) {
+  if (!value) return null;
+
+  if (Object.prototype.toString.call(value) === "[object Date]" && !isNaN(value.getTime())) {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+  }
+
+  var raw = value.toString().trim();
+  var isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    return new Date(parseInt(isoMatch[1], 10), parseInt(isoMatch[2], 10) - 1, parseInt(isoMatch[3], 10));
+  }
+
+  var ukMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (ukMatch) {
+    return new Date(parseInt(ukMatch[3], 10), parseInt(ukMatch[2], 10) - 1, parseInt(ukMatch[1], 10));
+  }
+
+  var parsed = new Date(raw);
+  if (isNaN(parsed.getTime())) return null;
+  return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+}
+
+function toDateKey(date) {
+  return Utilities.formatDate(date, Session.getScriptTimeZone(), "yyyy-MM-dd");
+}
+
+function addDays(date, days) {
+  var next = new Date(date);
+  next.setDate(next.getDate() + days);
+  next.setHours(0, 0, 0, 0);
+  return next;
+}
+
 function getRowAmount(row, displayRow, col) {
   if (col < 0 || col >= row.length) return 0;
   return parseAmountCell(row[col], displayRow[col]);
@@ -193,6 +242,79 @@ function getExpenseCategorySummaries(ss, month) {
   return categories;
 }
 
+function getDailySpending(ss, fromParam, toParam) {
+  var fromDate = parseDateParam(fromParam);
+  var toDate = parseDateParam(toParam);
+
+  if (!fromDate || !toDate) {
+    return { status: "error", message: "Invalid date range" };
+  }
+
+  if (fromDate.getTime() > toDate.getTime()) {
+    return { status: "error", message: "From date must be before To date" };
+  }
+
+  var maxDays = 370;
+  var dayCount = Math.floor((toDate.getTime() - fromDate.getTime()) / 86400000) + 1;
+  if (dayCount > maxDays) {
+    return { status: "error", message: "Date range is too large" };
+  }
+
+  var dailyTotals = {};
+  var days = [];
+  for (var cursor = new Date(fromDate); cursor.getTime() <= toDate.getTime(); cursor = addDays(cursor, 1)) {
+    var key = toDateKey(cursor);
+    dailyTotals[key] = 0;
+    days.push({
+      date: key,
+      label: Utilities.formatDate(cursor, Session.getScriptTimeZone(), "EEE d MMM"),
+      amount: 0
+    });
+  }
+
+  var txSheet = ss.getSheetByName("Transactions");
+  if (!txSheet) {
+    return {
+      status: "ok",
+      from: toDateKey(fromDate),
+      to: toDateKey(toDate),
+      total: 0,
+      data: days
+    };
+  }
+
+  var rows = txSheet.getDataRange().getValues();
+  for (var i = 1; i < rows.length; i++) {
+    var row = rows[i];
+    var type = normalizeKey(row[2]);
+    if (type !== "expense") continue;
+
+    var txDate = parseTransactionDateValue(row[3] || row[0]);
+    if (!txDate) continue;
+    txDate.setHours(0, 0, 0, 0);
+
+    if (txDate.getTime() < fromDate.getTime() || txDate.getTime() > toDate.getTime()) continue;
+
+    var txKey = toDateKey(txDate);
+    if (dailyTotals[txKey] === undefined) continue;
+    dailyTotals[txKey] += parseFloat(row[5]) || 0;
+  }
+
+  var total = 0;
+  days.forEach(function(day) {
+    day.amount = dailyTotals[day.date] || 0;
+    total += day.amount;
+  });
+
+  return {
+    status: "ok",
+    from: toDateKey(fromDate),
+    to: toDateKey(toDate),
+    total: total,
+    data: days
+  };
+}
+
 function doGet(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -218,7 +340,12 @@ function doGet(e) {
       return jsonResponse({status: "ok", data: summary});
     }
 
-    // 2. Handle expense category dropdown order and selected category pot details
+    // 2. Handle daily spending totals for analytics date ranges
+    if (action === "getDailySpending") {
+      return jsonResponse(getDailySpending(ss, e.parameter.from, e.parameter.to));
+    }
+
+    // 3. Handle expense category dropdown order and selected category pot details
     if (action === "getExpenseCategories") {
       if (!month) return jsonResponse({status: "error", message: "Missing month"});
 
@@ -232,7 +359,7 @@ function doGet(e) {
       });
     }
 
-    // 3. Handle Latest Transactions List
+    // 4. Handle Latest Transactions List
     if (action === "getLatestTransactions") {
       var txSheet = ss.getSheetByName("Transactions");
       if (!txSheet) return jsonResponse({status: "ok", data: []});
@@ -258,7 +385,7 @@ function doGet(e) {
       return jsonResponse({status: "ok", data: transactions});
     }
 
-    // 4. Handle Home Page Balance (E13/F13/G13 — Left, Scheduled Left, Forecast Left)
+    // 5. Handle Home Page Balance (E13/F13/G13 — Left, Scheduled Left, Forecast Left)
     if (month) {
       var sheet = ss.getSheetByName(month);
       if (!sheet) return jsonResponse({status: "error", message: "Month tab not found"});
