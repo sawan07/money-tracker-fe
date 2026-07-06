@@ -1,5 +1,23 @@
 # Money Manager API Handover
 
+**After every push:** update this file + `README.md` → `git push` → log to Airtable from `money-manager-api` (`npm run log:handoff`).
+
+## Backend status (July 2026)
+
+The Kotlin API in **`money-manager-api`** is implemented and tested locally. This frontend still uses **Google Apps Script + Google Sheets** — wiring to the REST API is deferred.
+
+| Area | Status |
+|------|--------|
+| Core transactions + analytics endpoints | Done in API |
+| JWT multi-user auth | Done in API |
+| Recurring templates + month initialize | Done in API |
+| Per-month line overrides | Done in API |
+| User-defined spending/earning categories | Done in API |
+| Default category presets (salary, rent, etc.) | **Frontend** — add when integrating API |
+| Replace Google Sheets backend in this repo | **Not started** |
+
+API handoff: [`money-manager-api/HANDOVER.md`](../money-manager-api/HANDOVER.md) · Swagger: `http://localhost:8081/docs`
+
 ## Target repository
 
 ```txt
@@ -160,8 +178,15 @@ This can be calculated later or stubbed initially if needed.
 
 ## Notes
 
-- This is replacing Google Apps Script eventually, but do not modify the frontend repo in the first API pass.
+- This is replacing Google Apps Script eventually, but do not modify the frontend repo until API integration is explicitly requested.
 - Keep the first API version practical and small.
 - Prioritize clean DB schema and endpoints matching the current app behavior.
-- Avoid overengineering auth for the first pass.
-- Add a clear TODO or simple API key middleware if useful.
+- JWT email/password auth is implemented in the API for multi-user App Store / Play Store rollout.
+- Default category presets are a frontend UX concern when switching from Sheets to the API.
+
+## Work log (Airtable)
+
+- **Project:** Money Manager App
+- **Base:** `appe8oeguzTq8XzY5` · **Logs table:** `tblUH5FCiJD7KNIVm`
+- Run from API repo: `cd ../money-manager-api && npm run log:handoff`
+- Same calendar day updates one row (appends to **Changelog Update**); see API `HANDOVER.md` for token/env details.
