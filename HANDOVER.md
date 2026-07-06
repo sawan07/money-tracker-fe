@@ -16,6 +16,7 @@ The Kotlin API in **`money-manager-api`** is the primary backend. The frontend s
 | Loan ledger + payee on Loan paid | Done in API + FE (Loans page, API sign-in) |
 | Shop picker on Takeaway/Grocery | Done in API + FE |
 | FE wired to Kotlin API (JWT) | Done — sign in overlay; GAS fallback |
+| API-first category catalog + month init UI | Done — `catalog.js`, seed defaults, initialize month |
 | Replace Google Sheets backend in this repo | **Optional legacy** — "Continue with Google Sheets" |
 
 API handoff: [`money-manager-api/HANDOVER.md`](../money-manager-api/HANDOVER.md) · Swagger: `http://localhost:8081/docs`

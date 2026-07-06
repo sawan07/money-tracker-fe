@@ -38,8 +38,26 @@ function formatShortRangeDate(value) {
 }
 
 function formatMonthLabel(dateStr) {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+    const parsed = parseMonthKey(dateStr);
+    if (!parsed) return dateStr;
+    return parsed.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+}
+
+function parseMonthKey(key) {
+    if (!key) return null;
+    const direct = new Date(key);
+    if (!Number.isNaN(direct.getTime())) return direct;
+    const withDay = new Date(`1 ${key}`);
+    return Number.isNaN(withDay.getTime()) ? null : withDay;
+}
+
+function sortMonthKeys(keys) {
+    return [...keys].sort((a, b) => {
+        const aDate = parseMonthKey(a);
+        const bDate = parseMonthKey(b);
+        if (!aDate || !bDate) return a.localeCompare(b);
+        return aDate - bDate;
+    });
 }
 
 function formatCurrency(amount) {
@@ -340,7 +358,7 @@ async function initAnalytics() {
 
         rawChartData = result.data;
 
-        const sortedMonthKeys = Object.keys(rawChartData).sort((a, b) => new Date(a) - new Date(b));
+        const sortedMonthKeys = sortMonthKeys(Object.keys(rawChartData));
         const newestMonth = sortedMonthKeys[sortedMonthKeys.length - 1];
 
         // Populate Pie Month Dropdown
@@ -529,3 +547,17 @@ hideLockOverlay = function () {
     originalHideOverlay();
     initAnalytics();
 };
+
+function bootAnalytics() {
+    if (typeof hideLockOverlay !== "function") {
+        initAnalytics();
+        return;
+    }
+    const overlay = document.getElementById("lockOverlay");
+    if (!overlay || overlay.style.display === "none") {
+        initAnalytics();
+    }
+}
+
+document.addEventListener("DOMContentLoaded", bootAnalytics);
+window.addEventListener("moneytracker:auth-ready", bootAnalytics);

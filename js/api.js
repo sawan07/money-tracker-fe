@@ -300,6 +300,38 @@ const MoneyTracker = (() => {
         };
     }
 
+    async function listSpendingCategories() {
+        const result = await apiFetch("/categories/spending");
+        return Array.isArray(result.data) ? result.data : [];
+    }
+
+    async function listEarningCategories() {
+        const result = await apiFetch("/categories/earning");
+        return Array.isArray(result.data) ? result.data : [];
+    }
+
+    async function upsertSpendingCategory(category) {
+        const result = await apiFetch("/categories/spending", {
+            method: "PUT",
+            body: JSON.stringify(category),
+        });
+        return result.data;
+    }
+
+    async function upsertEarningCategory(category) {
+        const result = await apiFetch("/categories/earning", {
+            method: "PUT",
+            body: JSON.stringify(category),
+        });
+        return result.data;
+    }
+
+    async function initializeMonth(month) {
+        return apiFetch(`/months/${encodeURIComponent(month)}/initialize`, {
+            method: "POST",
+        });
+    }
+
     return {
         GAS_URL,
         STORAGE,
@@ -325,6 +357,11 @@ const MoneyTracker = (() => {
         upsertLoan,
         deleteLoan,
         getShops,
+        listSpendingCategories,
+        listEarningCategories,
+        upsertSpendingCategory,
+        upsertEarningCategory,
+        initializeMonth,
     };
 })();
 

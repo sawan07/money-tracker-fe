@@ -173,12 +173,8 @@ function getExpenseCategorySelect() {
 }
 
 function captureFallbackExpenseCategories() {
-    const categorySelect = getExpenseCategorySelect();
-    if (!categorySelect || fallbackExpenseCategories.length) return;
-
-    fallbackExpenseCategories = Array.from(categorySelect.options)
-        .map(option => option.value)
-        .filter(Boolean);
+    if (fallbackExpenseCategories.length) return;
+    fallbackExpenseCategories = [...FALLBACK_EXPENSE_CATEGORY_NAMES];
 }
 
 function setCategorySummaryText(message) {

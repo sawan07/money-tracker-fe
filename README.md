@@ -36,10 +36,18 @@ npm run clasp:push
 
 ## Pages
 
-- `index.html` — add expense/earning, month overview
+- `index.html` — add expense/earning, month overview, first-time setup banner
 - `loans.html` — loan balances (API)
-- `analytics.html` — charts
+- `analytics.html` — charts (API or legacy GAS)
 - `transactions.html` — recent transactions
+
+## First-time API setup
+
+1. Sign in (create account if needed).
+2. On Home, click **Seed default categories** (pots match your legacy sheet).
+3. Click **Initialize month** for the selected month (seeds recurring lines).
+4. On **Loans**, click **Import sheet defaults** for loan balances.
+5. Log expenses — Loan paid / Takeaway / Grocery use API pickers.
 
 ## Run locally
 
