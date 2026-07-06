@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Money Tracker</title>
-    <link rel="stylesheet" href="assets/style.css?v=10">
+    <link rel="stylesheet" href="assets/style.css?v=11">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
@@ -19,11 +19,20 @@
             </button>
             <ul class="nav-menu" id="navMenu">
                 <li><a href="index.html">Home</a></li>
+                <li><a href="loans.html">Loans</a></li>
                 <li><a href="analytics.html">Analytics</a></li>
                 <li><a href="transactions.html">Transactions</a></li>
             </ul>
         </div>
     </nav>
+
+    <div class="auth-bar">
+        <span id="authStatus">Checking sign-in...</span>
+        <div class="auth-bar-actions">
+            <button type="button" id="authSignInBtn" class="secondary-btn">Sign in</button>
+            <button type="button" id="authSignOutBtn" class="secondary-btn hidden">Sign out</button>
+        </div>
+    </div>
 
     <!-- Add near top of body -->
     <div id="lockOverlay" style="display:none">
@@ -128,6 +137,7 @@
         </div>
         <label id="loanPersonField" class="conditional-field hidden">
             Paying to:
+            <select id="loanPersonSelect" name="loanCreditorId" class="hidden"></select>
             <input type="text" id="loanPersonInput" name="loanPerson" list="loanPersonOptions" placeholder="Select or type a name">
             <datalist id="loanPersonOptions"></datalist>
         </label>
@@ -165,12 +175,14 @@
     </form>
 
     <!-- Scripts -->
-    <script src="js/app.js?v=7"></script>
-    <script src="js/expense-fields.js?v=1"></script>
-    <script src="js/expense.js?v=5"></script>
-    <script src="js/earning.js?v=3"></script>
+    <script src="js/api.js?v=1"></script>
+    <script src="js/auth.js?v=1"></script>
+    <script src="js/app.js?v=8"></script>
+    <script src="js/expense-fields.js?v=2"></script>
+    <script src="js/expense.js?v=6"></script>
+    <script src="js/earning.js?v=4"></script>
     <script src="js/biometric.js?v=2"></script>
-    <script src="js/nav.js?v=2"></script>
+    <script src="js/nav.js?v=3"></script>
 </body>
 
 </html>

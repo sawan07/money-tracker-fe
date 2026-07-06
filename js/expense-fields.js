@@ -18,26 +18,11 @@ const DEFAULT_LOAN_PEOPLE = [
 ];
 
 const DEFAULT_TAKEAWAY_SHOPS = [
-    "Uber Eats",
-    "Deliveroo",
-    "Just Eat",
-    "McDonald's",
-    "KFC",
-    "Domino's",
-    "Pizza Hut",
-    "Nando's",
+    "Uber Eats", "Deliveroo", "Just Eat", "McDonald's", "KFC", "Domino's", "Pizza Hut", "Nando's",
 ];
 
 const DEFAULT_GROCERY_SHOPS = [
-    "Tesco",
-    "Sainsbury's",
-    "Asda",
-    "Aldi",
-    "Lidl",
-    "Morrisons",
-    "Waitrose",
-    "Iceland",
-    "Costco",
+    "Tesco", "Sainsbury's", "Asda", "Aldi", "Lidl", "Morrisons", "Waitrose", "Iceland", "Costco",
 ];
 
 function normalizeCategoryName(value) {
@@ -90,29 +75,81 @@ function rememberShop(name) {
     writeJsonStorage(SHOP_OPTIONS_KEY, shops.slice(0, 50));
 }
 
-function populateLoanPersonOptions() {
-    const datalist = document.getElementById("loanPersonOptions");
-    if (!datalist) return;
+function setLoanFieldMode(apiMode) {
+    const loanSelect = document.getElementById("loanPersonSelect");
+    const loanInput = document.getElementById("loanPersonInput");
+    if (!loanSelect || !loanInput) return;
 
+    loanSelect.classList.toggle("hidden", !apiMode);
+    loanInput.classList.toggle("hidden", apiMode);
+    loanSelect.required = apiMode;
+    loanInput.required = !apiMode;
+}
+
+async function populateLoanPersonOptions() {
+    const loanSelect = document.getElementById("loanPersonSelect");
+    const datalist = document.getElementById("loanPersonOptions");
+    if (!loanSelect || !datalist) return;
+
+    if (MoneyTracker.isApiEnabled()) {
+        setLoanFieldMode(true);
+        loanSelect.innerHTML = '<option value="">Select person</option>';
+
+        try {
+            const { data } = await MoneyTracker.getLoans();
+            loanSelect.innerHTML = '<option value="">Select person</option>' + data.map(person => {
+                const balance = `${person.amountOwed.toFixed(2)} ${person.currency}`;
+                const gbp = `≈ £${person.gbpApprox.toFixed(2)}`;
+                return `<option value="${person.id}">${person.displayName} — ${balance} (${gbp})</option>`;
+            }).join("");
+        } catch (error) {
+            console.error("Failed to load loan creditors:", error);
+            loanSelect.innerHTML = '<option value="">Could not load loans</option>';
+        }
+        return;
+    }
+
+    setLoanFieldMode(false);
     datalist.innerHTML = getLoanPeople()
         .map(person => `<option value="${person.name}"></option>`)
         .join("");
 }
 
-function populateShopOptions(categoryName) {
+async function populateShopOptions(categoryName) {
     const datalist = document.getElementById("shopOptions");
-    if (!datalist) return;
+    const shopInput = document.getElementById("shopInput");
+    if (!datalist || !shopInput) return;
 
     const key = normalizeCategoryName(categoryName);
-    const defaults = key === "takeaway"
-        ? DEFAULT_TAKEAWAY_SHOPS
-        : key === "grocery"
-            ? DEFAULT_GROCERY_SHOPS
-            : [];
+    const scope = key === "takeaway" ? "takeaway" : key === "grocery" ? "grocery" : null;
+    if (!scope) {
+        datalist.innerHTML = "";
+        return;
+    }
 
-    const saved = getSavedShops();
-    const merged = [...saved, ...defaults]
-        .filter((shop, index, list) => list.findIndex(item => item.toLowerCase() === shop.toLowerCase()) === index);
+    let merged = [];
+
+    if (MoneyTracker.isApiEnabled()) {
+        try {
+            const { data, suggestions } = await MoneyTracker.getShops(scope);
+            merged = [
+                ...data.map(shop => shop.name),
+                ...suggestions,
+            ];
+        } catch (error) {
+            console.error("Failed to load shops:", error);
+        }
+    }
+
+    if (!merged.length) {
+        const defaults = scope === "takeaway" ? DEFAULT_TAKEAWAY_SHOPS : DEFAULT_GROCERY_SHOPS;
+        const saved = getSavedShops();
+        merged = [...saved, ...defaults];
+    }
+
+    merged = merged.filter((shop, index, list) =>
+        list.findIndex(item => item.toLowerCase() === shop.toLowerCase()) === index,
+    );
 
     datalist.innerHTML = merged.map(shop => `<option value="${shop}"></option>`).join("");
 }
@@ -122,6 +159,7 @@ function updateExpenseConditionalFields(categoryName) {
     const loanField = document.getElementById("loanPersonField");
     const shopField = document.getElementById("shopField");
     const loanInput = document.getElementById("loanPersonInput");
+    const loanSelect = document.getElementById("loanPersonSelect");
     const shopInput = document.getElementById("shopInput");
 
     const showLoan = key === "loan paid";
@@ -129,9 +167,9 @@ function updateExpenseConditionalFields(categoryName) {
 
     if (loanField) {
         loanField.classList.toggle("hidden", !showLoan);
-        if (loanInput) {
-            loanInput.required = showLoan;
-            if (!showLoan) loanInput.value = "";
+        if (!showLoan) {
+            if (loanInput) loanInput.value = "";
+            if (loanSelect) loanSelect.value = "";
         }
     }
 
@@ -154,6 +192,10 @@ function initExpenseConditionalFields() {
     const handleChange = () => updateExpenseConditionalFields(categorySelect.value);
     categorySelect.addEventListener("change", handleChange);
     handleChange();
+
+    window.addEventListener("moneytracker:auth-ready", () => {
+        updateExpenseConditionalFields(categorySelect.value);
+    });
 }
 
 document.addEventListener("DOMContentLoaded", initExpenseConditionalFields);

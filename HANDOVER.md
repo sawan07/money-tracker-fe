@@ -4,7 +4,7 @@
 
 ## Backend status (July 2026)
 
-The Kotlin API in **`money-manager-api`** is implemented and tested locally. This frontend still uses **Google Apps Script + Google Sheets** — wiring to the REST API is deferred.
+The Kotlin API in **`money-manager-api`** is the primary backend. The frontend supports **JWT sign-in** to the Kotlin API (loans, shops, live balances) with an optional **Google Sheets** fallback.
 
 | Area | Status |
 |------|--------|
@@ -13,10 +13,10 @@ The Kotlin API in **`money-manager-api`** is implemented and tested locally. Thi
 | Recurring templates + month initialize | Done in API |
 | Per-month line overrides | Done in API |
 | User-defined spending/earning categories | Done in API |
-| Loan ledger + payee on Loan paid | Done in API |
-| Shop picker on Takeaway/Grocery | Done in API (FE UI); GAS backend not wired |
-| Default category presets (salary, rent, etc.) | **Frontend** — add when integrating API |
-| Replace Google Sheets backend in this repo | **Not started** |
+| Loan ledger + payee on Loan paid | Done in API + FE (Loans page, API sign-in) |
+| Shop picker on Takeaway/Grocery | Done in API + FE |
+| FE wired to Kotlin API (JWT) | Done — sign in overlay; GAS fallback |
+| Replace Google Sheets backend in this repo | **Optional legacy** — "Continue with Google Sheets" |
 
 API handoff: [`money-manager-api/HANDOVER.md`](../money-manager-api/HANDOVER.md) · Swagger: `http://localhost:8081/docs`
 

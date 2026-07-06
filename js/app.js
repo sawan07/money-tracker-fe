@@ -1,5 +1,3 @@
-const API_URL = "https://script.google.com/macros/s/AKfycby6VamdvDR7uSPqlpC6tTiJWx1uVUJqABb1nXV8WaMJKXNTSoi9zHe9ULrYpPwQHoWCJw/exec";
-
 // Month generation
 const monthSelect = document.getElementById("monthSelect");
 const monthNames = [
@@ -23,9 +21,8 @@ function generateMonths() {
 
 function populateMonthDropdown() {
     const months = generateMonths();
-    const monthSelect = document.getElementById("monthSelect"); // cite: 4
+    const monthSelect = document.getElementById("monthSelect");
 
-    // Safety check: if the element isn't on this page, stop here
     if (!monthSelect) return;
 
     months.forEach(m => {
@@ -33,73 +30,50 @@ function populateMonthDropdown() {
         option.value = m.label;
         option.textContent = m.label;
         if (m.isCurrent) option.selected = true;
-        monthSelect.appendChild(option); // cite: 4
+        monthSelect.appendChild(option);
     });
 }
 
 populateMonthDropdown();
 
-// Helper to send data
 async function sendData(type, formData, month) {
-    const category = formData.get("category");
-    const loanPerson = formData.get("loanPerson");
-    const shop = formData.get("shop");
-    let notes = formData.get("notes") || "";
-
     if (type === "expense") {
-        if (loanPerson) {
-            notes = notes ? `${notes} | Paid to: ${loanPerson}` : `Paid to: ${loanPerson}`;
-            if (typeof rememberLoanPerson === "function") rememberLoanPerson(loanPerson);
+        if (typeof rememberLoanPerson === "function") {
+            const loanPerson = formData.get("loanPerson") || formData.get("loanCreditorId");
+            if (loanPerson && !MoneyTracker.isApiEnabled()) rememberLoanPerson(loanPerson);
         }
-        if (shop) {
-            notes = notes ? `${notes} | Shop: ${shop}` : `Shop: ${shop}`;
-            if (typeof rememberShop === "function") rememberShop(shop);
+        if (typeof rememberShop === "function") {
+            const shop = formData.get("shop");
+            if (shop) rememberShop(shop);
         }
     }
 
-    const payload = {
-        type,
-        month,
-        date: formData.get("date"),
-        amount: formData.get("amount"),
-        category,
-        source: formData.get("source"),
-        notes,
-        loanPerson: loanPerson || null,
-        shop: shop || null,
-    };
-
     try {
-        const res = await fetch(API_URL, {
-            method: "POST",
-            mode: "no-cors",   // 👈 disables CORS enforcement
-            headers: { "Content-Type": "text/plain" }, // 👈 avoid preflight
-            body: JSON.stringify(payload)
-        });
-
-        // ⚠️ With no-cors, response is opaque, so we can't read it.
-        // Just assume success if no error thrown.
-        return true;
-
+        if (type === "expense") {
+            return await MoneyTracker.sendExpense(formData, month);
+        }
+        return await MoneyTracker.sendEarning(formData, month);
     } catch (err) {
-        console.error("Fetch failed:", err);
-        return false;
+        console.error("Submit failed:", err);
+        throw err;
     }
 }
 
 function startProgress() {
     const bar = document.getElementById("progressBar");
+    if (!bar) return;
     bar.style.width = "0";
     setTimeout(() => {
-        bar.style.width = "80%"; // grow to 80% while waiting
+        bar.style.width = "80%";
     }, 50);
 }
 
 function finishProgress() {
     const bar = document.getElementById("progressBar");
-    bar.style.width = "100%"; // complete bar
+    if (!bar) return;
+    bar.style.width = "100%";
     setTimeout(() => {
-        bar.style.width = "0"; // reset after short delay
+        bar.style.width = "0";
     }, 400);
 }
 
@@ -155,7 +129,8 @@ function renderHomeTransactions(items) {
         const amountClass = isExpense ? "amount-expense" : "amount-earning";
         const sign = isExpense ? "-" : "+";
         const title = escapeHtml(item.categoryOrSource || "-");
-        const note = escapeHtml(item.notes ? item.notes : "No note");
+        const meta = [item.loanCreditor, item.shop].filter(Boolean).join(" · ");
+        const note = escapeHtml(meta || (item.notes ? item.notes : "No note"));
         const type = escapeHtml(item.type || "transaction");
 
         return `
@@ -181,14 +156,8 @@ async function loadHomeTransactions() {
     listEl.innerHTML = '<div class="empty-state">Loading transactions...</div>';
 
     try {
-        const res = await fetch(`${API_URL}?action=getLatestTransactions&_=${Date.now()}`, { cache: "no-store" });
-        const result = await res.json();
-
-        if (result.status !== "ok") {
-            throw new Error(result.message || "Could not load transactions");
-        }
-
-        renderHomeTransactions(Array.isArray(result.data) ? result.data : []);
+        const items = await MoneyTracker.loadLatestTransactions(10);
+        renderHomeTransactions(items);
     } catch (err) {
         console.error("Failed to load home transactions:", err);
         listEl.innerHTML = '<div class="empty-state">Could not load latest transactions.</div>';
@@ -312,9 +281,7 @@ async function refreshExpenseCategories(month, preferredCategory) {
     categorySelect.innerHTML = '<option>Loading categories...</option>';
 
     try {
-        const categoryUrl = `${API_URL}?action=getExpenseCategories&month=${encodeURIComponent(month)}&_=${Date.now()}`;
-        const res = await fetch(categoryUrl, { cache: "no-store" });
-        const data = await res.json();
+        const data = await MoneyTracker.getExpenseCategories(month);
 
         if (data.status !== "ok" || !Array.isArray(data.categories)) {
             throw new Error(data.message || "Invalid category response");
@@ -368,13 +335,10 @@ function updateLeftSummaryDisplay(data) {
 }
 
 async function fetchBalance(month) {
-    console.log("Fetching balance for month:", month); // Debug
+    if (!month) return;
 
     try {
-        const res = await fetch(`${API_URL}?month=${encodeURIComponent(month)}`);
-        const data = await res.json();
-        console.log("API response:", data); // Debug
-
+        const data = await MoneyTracker.fetchBalance(month);
         if (data.status === "ok") {
             updateLeftSummaryDisplay(data);
         } else {
@@ -385,21 +349,26 @@ async function fetchBalance(month) {
     }
 }
 
-// --- Run after DOM is ready ---
+function refreshHomeData() {
+    const monthSelectEl = document.getElementById("monthSelect");
+    const month = monthSelectEl ? monthSelectEl.value : "";
+    loadHomeTransactions();
+    if (month) {
+        fetchBalance(month);
+        refreshExpenseCategories(month);
+    }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-    const monthSelect = document.getElementById("monthSelect"); // cite: 4
+    const monthSelectEl = document.getElementById("monthSelect");
     const expenseCategorySelect = getExpenseCategorySelect();
 
     captureFallbackExpenseCategories();
-    loadHomeTransactions();
+    refreshHomeData();
 
-    if (monthSelect) {
-        const currentMonth = monthSelect.value;
-        fetchBalance(currentMonth); // cite: 4
-        refreshExpenseCategories(currentMonth);
-
-        monthSelect.addEventListener("change", (e) => {
-            fetchBalance(e.target.value); // cite: 4
+    if (monthSelectEl) {
+        monthSelectEl.addEventListener("change", (e) => {
+            fetchBalance(e.target.value);
             refreshExpenseCategories(e.target.value);
         });
     }
@@ -408,23 +377,15 @@ document.addEventListener("DOMContentLoaded", () => {
         expenseCategorySelect.addEventListener("change", (e) => {
             updateExpenseCategorySummary(e.target.value);
         });
-        if (!monthSelect) {
+        if (!monthSelectEl) {
             updateExpenseCategorySummary(expenseCategorySelect.value);
         }
     }
 
-    const refreshBtn = document.getElementById("refreshBalanceBtn"); // cite: 4
+    const refreshBtn = document.getElementById("refreshBalanceBtn");
     if (refreshBtn) {
-        refreshBtn.addEventListener("click", () => {
-            const month = monthSelect ? monthSelect.value : "";
-            if (month) {
-                fetchBalance(month); // cite: 4
-                refreshExpenseCategories(month);
-            }
-        });
+        refreshBtn.addEventListener("click", refreshHomeData);
     }
+
+    window.addEventListener("moneytracker:auth-ready", refreshHomeData);
 });
-
-
-
-

@@ -996,5 +996,124 @@ button:hover {
     .pie-canvas-wrap {
         height: 300px;
     }
+}
+
+.auth-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(4, 10, 20, 0.82);
+    backdrop-filter: blur(8px);
+}
+
+.auth-card {
+    width: min(100%, 420px);
+    padding: 1.5rem;
+    border-radius: 18px;
+    border: 1px solid var(--border-strong);
+    background: var(--card-strong);
+    box-shadow: var(--shadow);
+}
+
+.auth-subtitle {
+    color: var(--subtle);
+    margin: 0 0 1rem;
+}
+
+.auth-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.auth-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 0 1.25rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--card);
+}
+
+.auth-bar-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.secondary-btn,
+button.secondary-btn {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+}
+
+.link-btn {
+    margin-top: 0.75rem;
+    background: none;
+    border: none;
+    color: var(--primary);
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.compact-form {
+    display: grid;
+    gap: 0.85rem;
+    max-width: 520px;
+}
+
+.loans-card,
+.loans-toolbar {
+    margin-bottom: 1.25rem;
+}
+
+.loans-toolbar {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.loans-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--card);
+}
+
+.loans-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.loans-table th,
+.loans-table td {
+    padding: 0.85rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.loans-table tfoot th {
+    font-weight: 700;
+}
+
+.loans-table .amount-cell {
+    font-variant-numeric: tabular-nums;
+}
+
+.message.error {
+    color: var(--danger);
+}
+
+.message.success {
+    color: var(--success);
+}
 
 }

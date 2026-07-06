@@ -40,25 +40,7 @@ async function loadLatestTransactions() {
     listEl.innerHTML = '<div class="empty-state">Loading transactions...</div>';
 
     try {
-        const res = await fetch(`${API_URL}?action=getLatestTransactions`);
-        const responseText = await res.text();
-        let result = null;
-
-        try {
-            result = JSON.parse(responseText);
-        } catch (parseErr) {
-            console.error("Transactions response is not JSON:", responseText);
-            listEl.innerHTML = '<div class="empty-state">Unexpected API response. Please hard refresh and try again.</div>';
-            return;
-        }
-
-        if (result.status !== "ok") {
-            const apiMsg = result.message ? ` (${result.message})` : "";
-            listEl.innerHTML = `<div class="empty-state">Could not load transactions${apiMsg}</div>`;
-            return;
-        }
-
-        const items = Array.isArray(result.data) ? result.data : [];
+        const items = await MoneyTracker.loadLatestTransactions(100);
         if (!items.length) {
             listEl.innerHTML = '<div class="empty-state">No transactions found yet.</div>';
             return;
@@ -138,4 +120,5 @@ document.addEventListener("DOMContentLoaded", () => {
     if (refreshBtn) {
         refreshBtn.addEventListener("click", loadLatestTransactions);
     }
+    window.addEventListener("moneytracker:auth-ready", loadLatestTransactions);
 });

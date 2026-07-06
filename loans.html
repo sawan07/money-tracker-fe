@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Loans - Money Tracker</title>
+    <link rel="stylesheet" href="assets/style.css?v=11">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">Money Tracker</div>
+            <button class="burger" id="burgerBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="loans.html">Loans</a></li>
+                <li><a href="analytics.html">Analytics</a></li>
+                <li><a href="transactions.html">Transactions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="auth-bar">
+        <span id="authStatus">Checking sign-in...</span>
+        <div class="auth-bar-actions">
+            <button type="button" id="authSignInBtn" class="secondary-btn">Sign in</button>
+            <button type="button" id="authSignOutBtn" class="secondary-btn hidden">Sign out</button>
+        </div>
+    </div>
+
+    <h1>Loan Balances</h1>
+    <p class="subtitle">Track who you owe in their currency. Loan paid expenses deduct balances automatically when signed in to the API.</p>
+
+    <div class="loans-toolbar">
+        <button type="button" id="refreshLoansBtn" class="secondary-btn">Refresh</button>
+        <button type="button" id="importLoansBtn" class="secondary-btn">Import sheet defaults</button>
+    </div>
+
+    <div class="loans-card">
+        <div class="loans-table-wrap">
+            <table class="loans-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Amount owed</th>
+                        <th>Currency</th>
+                        <th>GBP (approx)</th>
+                    </tr>
+                </thead>
+                <tbody id="loansTableBody">
+                    <tr>
+                        <td colspan="4" class="empty-state">Loading loans...</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="3">Total (GBP approx)</th>
+                        <th id="loansTotalGbp" class="amount-cell">£0.00</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <h2>Add or update person</h2>
+    <form id="addLoanForm" class="compact-form">
+        <label>
+            Name
+            <input type="text" name="displayName" required>
+        </label>
+        <label>
+            Amount owed
+            <input type="number" step="0.01" name="amountOwed" required>
+        </label>
+        <label>
+            Currency
+            <select name="currency" required>
+                <option value="GBP">GBP</option>
+                <option value="BDT">BDT</option>
+                <option value="USD">USD</option>
+            </select>
+        </label>
+        <button type="submit">Save</button>
+    </form>
+    <div id="loansMessage" class="message" aria-live="polite"></div>
+
+    <script src="js/api.js?v=1"></script>
+    <script src="js/auth.js?v=1"></script>
+    <script src="js/app.js?v=8"></script>
+    <script src="js/loans.js?v=1"></script>
+    <script src="js/nav.js?v=3"></script>
+</body>
+
+</html>

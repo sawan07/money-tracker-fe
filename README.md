@@ -1,39 +1,50 @@
 # Money Tracker Frontend
 
-A simple frontend for adding monthly expenses and earnings to a Google Sheet backend.
+Web UI for logging expenses, earnings, loan balances, and analytics.
 
-## Setup
+## Backends
+
+The app supports two backends:
+
+1. **Kotlin API (recommended)** — JWT sign-in, loan auto-deduction, shops, live balances. Default API URL: `http://localhost:8081`
+2. **Google Sheets (legacy)** — via Google Apps Script Web App URL in `js/api.js` (`MoneyTracker.GAS_URL`)
+
+On first visit, sign in with your API email/password or choose **Continue with Google Sheets**.
+
+## Kotlin API setup
+
+1. Run `money-manager-api` locally (`docker compose up` or `./gradlew run`).
+2. Ensure `JWT_SECRET` is set in the API `.env`.
+3. Open `index.html` (or serve the folder with any static host).
+4. Sign in from the overlay — API URL defaults to `http://localhost:8081`.
+5. On **Loans**, click **Import sheet defaults** to load your existing loan balances.
+
+## Google Apps Script (legacy)
 
 1. Deploy the Google Apps Script as a Web App.
-2. Copy the deployment URL.
-3. Replace `API_URL` in `js/app.js` with your Web App URL.
+2. Update `MoneyTracker.GAS_URL` in `js/api.js` if needed.
+3. Use **Continue with Google Sheets** on the sign-in overlay.
 
-## Google Apps Script deployment with clasp
+### clasp
 
-This repo keeps the Apps Script backend in `scripts/`.
+```sh
+npm install
+npm run clasp:login
+# copy .clasp.json.example → .clasp.json, set scriptId
+npm run clasp:push
+```
 
-1. Install dependencies:
-   ```sh
-   npm install
-   ```
-2. Authenticate clasp:
-   ```sh
-   npm run clasp:login
-   ```
-3. Copy `.clasp.json.example` to `.clasp.json`, then replace the `scriptId` with the Apps Script project ID from **Project Settings > IDs > Script ID**.
-4. Push backend changes:
-   ```sh
-   npm run clasp:push
-   ```
+## Pages
 
-After pushing code, create or update the web app deployment in Apps Script if you need a new deployed version.
+- `index.html` — add expense/earning, month overview
+- `loans.html` — loan balances (API)
+- `analytics.html` — charts
+- `transactions.html` — recent transactions
 
 ## Run locally
 
-Just open `index.html` in your browser.
+Serve the folder (or open `index.html`). For API mode, the API must allow CORS (enabled in `money-manager-api`).
 
 ## Deploy
 
-- **GitHub Pages**: Push this repo to GitHub, then enable Pages.
-- **Netlify**: Drag-drop the folder in Netlify dashboard.
-- **Vercel**: Connect GitHub repo, deploy.
+- **GitHub Pages**, **Netlify**, or **Vercel** — static deploy; point API URL at your hosted Kotlin API in sign-in.

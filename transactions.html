@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Transactions - Money Tracker</title>
-    <link rel="stylesheet" href="assets/style.css?v=6">
+    <link rel="stylesheet" href="assets/style.css?v=11">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
@@ -19,11 +19,20 @@
             </button>
             <ul class="nav-menu" id="navMenu">
                 <li><a href="index.html">Home</a></li>
+                <li><a href="loans.html">Loans</a></li>
                 <li><a href="analytics.html">Analytics</a></li>
                 <li><a href="transactions.html">Transactions</a></li>
             </ul>
         </div>
     </nav>
+
+    <div class="auth-bar">
+        <span id="authStatus">Checking sign-in...</span>
+        <div class="auth-bar-actions">
+            <button type="button" id="authSignInBtn" class="secondary-btn">Sign in</button>
+            <button type="button" id="authSignOutBtn" class="secondary-btn hidden">Sign out</button>
+        </div>
+    </div>
 
     <div id="lockOverlay" style="display:none">
         <div id="lockBox">
@@ -44,10 +53,12 @@
         <div id="transactionsList" class="transactions-list"></div>
     </div>
 
-    <script src="js/nav.js?v=2"></script>
-    <script src="js/app.js?v=2"></script>
+    <script src="js/api.js?v=1"></script>
+    <script src="js/auth.js?v=1"></script>
+    <script src="js/app.js?v=8"></script>
+    <script src="js/nav.js?v=3"></script>
     <script src="js/biometric.js?v=2"></script>
-    <script src="js/transactions.js?v=2"></script>
+    <script src="js/transactions.js?v=3"></script>
 </body>
 
 </html>

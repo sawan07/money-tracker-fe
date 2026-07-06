@@ -149,9 +149,7 @@ async function loadPotProgress(monthKey, chartEntries) {
 
     try {
         const sheetMonth = formatMonthLabel(monthKey);
-        const categoryUrl = `${API_URL}?action=getExpenseCategories&month=${encodeURIComponent(sheetMonth)}&_=${Date.now()}`;
-        const res = await fetch(categoryUrl, { cache: "no-store" });
-        const data = await res.json();
+        const data = await MoneyTracker.getExpenseCategories(sheetMonth);
 
         if (data.status !== "ok" || !Array.isArray(data.categories)) {
             throw new Error(data.message || "Invalid category response");
@@ -275,9 +273,7 @@ async function loadDailySpending(range) {
     if (totalEl) totalEl.textContent = "Loading...";
 
     try {
-        const url = `${API_URL}?action=getDailySpending&from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}&_=${Date.now()}`;
-        const res = await fetch(url, { cache: "no-store" });
-        const result = await res.json();
+        const result = await MoneyTracker.getDailySpending(range.from, range.to);
 
         if (result.status !== "ok" || !Array.isArray(result.data)) {
             throw new Error(result.message || "Invalid daily spending response");
@@ -339,8 +335,7 @@ function setupDailySpendingControls() {
 
 async function initAnalytics() {
     try {
-        const res = await fetch(`${API_URL}?action=getChartData&_=${Date.now()}`, { cache: "no-store" });
-        const result = await res.json();
+        const result = await MoneyTracker.getChartData();
         if (result.status !== "ok") return;
 
         rawChartData = result.data;
