@@ -41,14 +41,32 @@ populateMonthDropdown();
 
 // Helper to send data
 async function sendData(type, formData, month) {
+    const category = formData.get("category");
+    const loanPerson = formData.get("loanPerson");
+    const shop = formData.get("shop");
+    let notes = formData.get("notes") || "";
+
+    if (type === "expense") {
+        if (loanPerson) {
+            notes = notes ? `${notes} | Paid to: ${loanPerson}` : `Paid to: ${loanPerson}`;
+            if (typeof rememberLoanPerson === "function") rememberLoanPerson(loanPerson);
+        }
+        if (shop) {
+            notes = notes ? `${notes} | Shop: ${shop}` : `Shop: ${shop}`;
+            if (typeof rememberShop === "function") rememberShop(shop);
+        }
+    }
+
     const payload = {
         type,
         month,
         date: formData.get("date"),
         amount: formData.get("amount"),
-        category: formData.get("category"),
+        category,
         source: formData.get("source"),
-        notes: formData.get("notes")
+        notes,
+        loanPerson: loanPerson || null,
+        shop: shop || null,
     };
 
     try {
@@ -279,6 +297,9 @@ function renderExpenseCategoryOptions(categories, preferredCategory) {
 
     categorySelect.value = matchingOption ? matchingOption.value : categorySelect.options[0].value;
     updateExpenseCategorySummary(categorySelect.value);
+    if (typeof updateExpenseConditionalFields === "function") {
+        updateExpenseConditionalFields(categorySelect.value);
+    }
 }
 
 async function refreshExpenseCategories(month, preferredCategory) {

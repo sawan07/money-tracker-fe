@@ -13,6 +13,8 @@ The Kotlin API in **`money-manager-api`** is implemented and tested locally. Thi
 | Recurring templates + month initialize | Done in API |
 | Per-month line overrides | Done in API |
 | User-defined spending/earning categories | Done in API |
+| Loan ledger + payee on Loan paid | Done in API |
+| Shop picker on Takeaway/Grocery | Done in API (FE UI); GAS backend not wired |
 | Default category presets (salary, rent, etc.) | **Frontend** — add when integrating API |
 | Replace Google Sheets backend in this repo | **Not started** |
 

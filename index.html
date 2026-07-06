@@ -126,6 +126,16 @@
                 </div>
             </div>
         </div>
+        <label id="loanPersonField" class="conditional-field hidden">
+            Paying to:
+            <input type="text" id="loanPersonInput" name="loanPerson" list="loanPersonOptions" placeholder="Select or type a name">
+            <datalist id="loanPersonOptions"></datalist>
+        </label>
+        <label id="shopField" class="conditional-field hidden">
+            Shop (optional):
+            <input type="text" id="shopInput" name="shop" list="shopOptions" placeholder="Select or type a shop">
+            <datalist id="shopOptions"></datalist>
+        </label>
         <label>Amount: <input type="number" step="0.01" name="amount" required></label>
         <label>Notes: <textarea name="notes"></textarea></label>
         <button type="submit">Add Expense</button>
@@ -155,8 +165,9 @@
     </form>
 
     <!-- Scripts -->
-    <script src="js/app.js?v=6"></script>
-    <script src="js/expense.js?v=4"></script>
+    <script src="js/app.js?v=7"></script>
+    <script src="js/expense-fields.js?v=1"></script>
+    <script src="js/expense.js?v=5"></script>
     <script src="js/earning.js?v=3"></script>
     <script src="js/biometric.js?v=2"></script>
     <script src="js/nav.js?v=2"></script>
