@@ -1,4 +1,4 @@
-# Money Manager API Handover
+# PockeTrend API Handover
 
 **After every push:** update this file + `README.md` → `git push` → log to Airtable from `money-manager-api` (`npm run log:handoff`).
 
@@ -29,7 +29,7 @@ https://github.com/Projucti-team/money-manager-api.git
 
 ## Context
 
-The current Money Tracker frontend uses Google Apps Script and Google Sheets as its backend. The goal is to move to a lower-cost practical backend hosted on a Hetzner server.
+The current PockeTrend web frontend uses Google Apps Script and Google Sheets as its backend. The goal is to move to a lower-cost practical backend hosted on a Hetzner server.
 
 Target architecture:
 
@@ -189,7 +189,7 @@ This can be calculated later or stubbed initially if needed.
 
 ## Work log (Airtable)
 
-- **Project:** Money Manager App
+- **Project:** PockeTrend App
 - **Base:** `appe8oeguzTq8XzY5` · **Logs table:** `tblUH5FCiJD7KNIVm`
 - Run from API repo: `cd ../money-manager-api && npm run log:handoff`
 - Same calendar day updates one row (appends to **Changelog Update**); see API `HANDOVER.md` for token/env details.

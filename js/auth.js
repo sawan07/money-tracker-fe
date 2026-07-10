@@ -6,7 +6,7 @@ function ensureAuthOverlay() {
         `
         <div id="authOverlay" class="auth-overlay hidden">
             <div class="auth-card">
-                <h2>Sign in to Money Tracker</h2>
+                <h2>Sign in to PockeTrend</h2>
                 <p class="auth-subtitle">Sign in to sync expenses, loans, pots, and analytics with the Kotlin API.</p>
                 <form id="authForm">
                     <label>

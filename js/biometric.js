@@ -32,7 +32,7 @@ async function registerBiometric() {
 
         const publicKey = {
             challenge: challenge,
-            rp: { name: "Money Tracker" },
+            rp: { name: "PockeTrend" },
             user: {
                 id: str2ab("local-user-id"),
                 name: "local-user",

@@ -1,4 +1,4 @@
-# Money Tracker Frontend
+# PockeTrend Frontend
 
 Web UI for logging expenses, earnings, loan balances, and analytics.
 
